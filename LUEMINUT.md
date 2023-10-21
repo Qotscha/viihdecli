@@ -356,3 +356,5 @@ prompt overwrite            Jos tallenne on jo ladattu, kysy ylikirjoitetaanko
 Listaus kansioiden pikavalinnoista, joita voi hyödyntää tallenteita siirtäessä.
 ### [Download folders]
 Listaus latauskansioiden pikavalinnoista.
+## Lisenssi
+Sovellus on julkaistu MIT-lisenssillä (ks. tiedosto LICENSE).
