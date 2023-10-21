@@ -57,12 +57,14 @@ def create_number_list(number_string, last_item):
         if to_add: number_list += to_add
     return number_list
 
-def set_folder_shortcut(folder_id, shortcut):
+def set_folder_shortcut(folder_id, shortcut, folder_name = '', print_msg = True):
     config['Folder shortcuts'][shortcut] = str(folder_id)
     with open(config_path, 'w') as configfile:
         config.write(configfile)
+    if print_msg:
+        print('Luotiin pikavalinta \033[92m' + shortcut + '\033[39m kansiolle \033[32m' + folder_name + '\033[39m.')
 
-def list_dl_folder_shortcuts(folder_dict):
+def list_folder_shortcuts(folder_dict):
     shortcut_dict = dict(config['Folder shortcuts'])
     print('\n\033[92m' + '{:<20}{}'.format('Pikavalinta', 'Kansio') + '\033[39m')
     for x in shortcut_dict:
@@ -84,7 +86,7 @@ def set_dl_folder_shortcut(dl_folder, shortcut):
     config['Download folders'][shortcut] = dl_folder
     with open(config_path, 'w') as configfile:
         config.write(configfile)
-    print('Luotiin pikavalinta \033[32m' + shortcut + '\033[39m latauskansiolle \033[32m' + dl_folder + '\033[39m.')
+    print('Luotiin pikavalinta \033[92m' + shortcut + '\033[39m latauskansiolle \033[32m' + dl_folder + '\033[39m.')
 
 def list_dl_folders():
     print('\nNykyinen latauskansio: \033[32m' + config['Download settings']['download folder'] + '\033[39m')
@@ -161,17 +163,14 @@ def handle_folders(folder_tree, headers, move_recordings = False, folder_dict = 
                     refresh_folders = handle_recordings(folder_tree, recordings['recordings'], headers, True, False, current_folder['id'])
                 if refresh_folders:
                     folder_tree = viihdeapi.get_folder_tree(headers, platform)
-                continue
             elif folder_number == command_strings.DOWNLOAD_FOLDER:
                 download_folder(str(current_folder['id']), headers)
-
+                continue
             elif folder_number.startswith(command_strings.SET_SHORTCUT):
-                set_folder_shortcut(current_folder['id'], folder_number.split(' ', 1)[1])
-                print('Luotiin pikavalinta \033[32m' + folder_number.split(' ', 1)[1] + '\033[39m kansiolle '
-                      + folder_dict[current_folder['id']][0] + '.')
+                set_folder_shortcut(current_folder['id'], folder_number.split(' ', 1)[1], folder_dict[current_folder['id']][0])
                 continue
             elif folder_number == command_strings.LIST_FOLDER_SHORTCUTS:
-                list_dl_folder_shortcuts(folder_dict)
+                list_folder_shortcuts(folder_dict)
                 continue
             elif folder_number.startswith(command_strings.DL_FOLDER_SHORTCUT):
                 set_dl_folder(config['Download folders'][folder_number.split(' ', 1)[1]])
@@ -224,7 +223,7 @@ def handle_folders(folder_tree, headers, move_recordings = False, folder_dict = 
 def list_folders(folder_dict, current_folder, folder_numbers):
     for x in folder_numbers:
         current_folder = current_folder['folders'][x]
-    print('\nNykyinen kansio: ' + folder_dict[current_folder['id']][0])
+    print('\nNykyinen kansio: \033[32m' + folder_dict[current_folder['id']][0] + '\033[39m')
     print('\n\033[92m{:<5}{:<35}{:<14}{}\033[39m'.format('#', 'Kansio', 'Tallenteita', 'Tallenteita ml. alikansiot'))
     for i, x in enumerate(current_folder['folders']):
         print('{:<5}{:<35}{:<14}{}'.format(str(i), x['name'], x['recordingsCount'], x['totalRecordingsCount']))
@@ -423,7 +422,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                                 if not config.has_option('Folder shortcuts','trash'):
                                     print('Valitse kansio, jota käytetään roskakorina.')
                                     trash_id, folders, folder_dict = handle_folders(folders, headers, True, folder_dict)
-                                    set_folder_shortcut(trash_id, 'trash')
+                                    set_folder_shortcut(trash_id, 'trash', print_msg = False)
                                 else:
                                     trash_id = config['Folder shortcuts']['trash']
                                 if viihdeapi.move_recordings(del_list_str, trash_id, headers, platform) == 200:
@@ -591,7 +590,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 if not config.has_option('Folder shortcuts','trash'):
                     print('\nValitse kansio, jota käytetään roskakorina.')
                     trash_id, folders, folder_dict = handle_folders(folders, headers, True, folder_dict)
-                    set_folder_shortcut(trash_id, 'trash')
+                    set_folder_shortcut(trash_id, 'trash', print_msg = False)
                 else:
                     trash_id = config['Folder shortcuts']['trash']
                 if int(config['General settings']['move prompt min']) and len(del_list) >= int(config['General settings']['move prompt min']):
@@ -719,8 +718,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                     folder_id = all_filtered_list[int(shortcut_split[1].strip())]['folderId']
                 else:
                     folder_id, folders, folder_dict = handle_folders(folders, headers, True, folder_dict)
-                set_folder_shortcut(folder_id, f_split[1])
-                print('Luotiin pikavalinta \033[32m' + f_split[1] + '\033[39m kansiolle ' + str(folder_dict[int(folder_id)][0]) + '.')
+                set_folder_shortcut(folder_id, f_split[1], folder_dict[int(folder_id)][0])
 
             elif f_string.startswith(command_strings.DL_FOLDER_SHORTCUT):
                 set_dl_folder(config['Download folders'][f_string.split(' ', 1)[1]])
@@ -738,7 +736,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 list_dl_folders()
 
             elif f_string == command_strings.LIST_FOLDER_SHORTCUTS:
-                list_dl_folder_shortcuts(folder_dict)
+                list_folder_shortcuts(folder_dict)
 
             else:
                 f_split = f_string.split(' ', 1)
