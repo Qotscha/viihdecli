@@ -6,7 +6,7 @@ import keyring
 os.system('color')
 
 def main():
-    version = '0.19'
+    version = '0.19.1'
     print('ViihdeCLI ' + version + ' (c) 2021-2023 Qotscha\n')
     # Load config file.
     config_path = os.path.join(os.environ['APPDATA'], 'viihdecli', 'settings.ini')
