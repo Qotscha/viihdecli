@@ -6,7 +6,7 @@ setup(
     long_description = 'Command line interface for handling Elisa Viihde recordings.',
     url = 'https://github.com/Qotscha/viihdecli',
     author = 'Qotscha',
-    version = '0.19.1',
+    version = '0.19.2',
     packages = ['viihdecli'],
     package_dir = {'viihdecli': 'src'},
     install_requires = [
