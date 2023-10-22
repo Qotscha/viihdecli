@@ -1,12 +1,13 @@
 from setuptools import setup
-
+with open('src/version.py') as fp:
+    exec(fp.read())
 setup(
     name = 'viihdecli',
     description = 'Command line interface for handling Elisa Viihde recordings',
     long_description = 'Command line interface for handling Elisa Viihde recordings.',
     url = 'https://github.com/Qotscha/viihdecli',
     author = 'Qotscha',
-    version = '0.19.2',
+    version = __version__,
     packages = ['viihdecli'],
     package_dir = {'viihdecli': 'src'},
     install_requires = [
