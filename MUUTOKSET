@@ -3,3 +3,6 @@
 
 0.19.2 (21.10.2023)
 - Lisätty värien käyttöä sekä muutenkin selkeytetty käyttöliittymää
+
+0.19.3 (22.10.2023)
+- Korjattu käyttäjänimen tallentaminen asetustiedostoon
