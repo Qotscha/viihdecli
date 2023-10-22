@@ -51,9 +51,6 @@ def main():
             config.write(configfile)
     config_changed = False
 
-    from . import viihdeapi
-    from . import viihde
-
     service_name = config['Login information']['service name']
 
     client_secret = 'nZhkFGz8Zd8w'
@@ -96,6 +93,8 @@ def main():
         if config['Login information'].getboolean('auto login') or save_username in ['k', 'y']:
             save_password = input('Tallennetaanko salasana (k/e)? ').lower()
 
+    from . import viihdeapi
+
     try:
         headers = viihdeapi.login(client_secret, api_key, username, password)
         print('\nKirjautuminen onnistui.')
@@ -112,6 +111,8 @@ def main():
         if not keyring.get_password(service_name, username) is None:
             keyring.delete_password(service_name, username)
         return
+
+    from . import viihde
 
     while True:
 
