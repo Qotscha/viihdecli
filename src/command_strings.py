@@ -35,6 +35,7 @@ RECYCLE_RECORDINGS = 'rm '
 RESTORE_RECORDINGS = 're '
 SHOW_FILTER_HELP = 'fh'
 SHOW_SORTING_HELP = 'sh'
+SHOW_WIDTH = 'sw'
 
 # Both views
 SHOW_HELP = 'h'
@@ -45,7 +46,8 @@ SET_DL_FOLDER = 'df '               # command dlFolderPath
 LIST_DL_FOLDERS = 'ld'
 LIST_FOLDER_SHORTCUTS = 'lf'
 RELOAD_CONFIG = 'rc'
-OPEN_CONFIG = 'oc'
+OPEN_CONFIG = 'o'
+OPEN_COLUMNS = 'oc'
 
 # Filters
 F_ACTOR = 'a'                       # lastName, firstName (wildcard * at end possible)

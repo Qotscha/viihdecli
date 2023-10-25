@@ -10,12 +10,13 @@ def main():
     version = version.__version__
     print('ViihdeCLI ' + version + ' (c) 2021-2023 Qotscha\n')
     # Load config file.
-    config_path = os.path.join(os.environ['APPDATA'], 'viihdecli', 'settings.ini')
+    config_location = os.path.join(os.environ['APPDATA'], 'viihdecli')
+    config_path = os.path.join(config_location, 'settings.ini')
     config = configparser.ConfigParser()
     cfg_list = config.read(config_path)
     if not cfg_list:
-        if not os.path.exists(os.path.join(os.environ['APPDATA'], 'viihdecli')):
-            os.mkdir(os.path.join(os.environ['APPDATA'], 'viihdecli'))
+        if not os.path.exists(os.path.join(config_location)):
+            os.mkdir(os.path.join(config_location))
         config['Login information'] = { 'service name': 'Elisa Viihde API',
                                         'username': '',
                                         'auto login': 'false' }
@@ -51,6 +52,42 @@ def main():
         with open(config_path, 'w') as configfile:
             config.write(configfile)
     config_changed = False
+    columns_path = os.path.join(config_location, 'columns.ini')
+    if not os.path.isfile(columns_path):
+        columns = configparser.ConfigParser()
+        columns['Recordings'] = { 'spacing': '3',
+                                  'negative': 'true',
+                                  'start day': 'true',
+                                  'start date': 'true',
+                                  'start time': 'true',
+                                  'end day': 'false',
+                                  'end date': 'false',
+                                  'end time': 'true',
+                                  'channel': '9',
+                                  'duration': 'true',
+                                  'name': '41',
+                                  'folder': '12',
+                                  'show imdb': 'true',
+                                  'show live': 'true' }
+        columns['Recycle bin'] = { 'spacing': '3',
+                                   'negative': 'false',
+                                   'removal day': 'false',
+                                   'removal date': 'true',
+                                   'removal time': 'false',
+                                   'start day': 'true',
+                                   'start date': 'true',
+                                   'start time': 'true',
+                                   'end day': 'false',
+                                   'end date': 'false',
+                                   'end time': 'false',
+                                   'channel': '9',
+                                   'duration': 'true',
+                                   'name': '43',
+                                   'folder': '13',
+                                   'show imdb': 'true',
+                                   'show live': 'true' }
+        with open(columns_path, 'w') as configfile:
+            columns.write(configfile)
 
     service_name = config['Login information']['service name']
 

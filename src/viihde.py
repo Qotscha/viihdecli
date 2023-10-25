@@ -9,15 +9,18 @@ from . import viihdeapi
 from . import command_strings
 from . import viihdehelp
 from .filter_recordings import filter_recordings
-from .print_recordings import print_recordings
+from .print_recordings import print_recordings, show_terminal_width
 from .duplicates import list_duplicates
 os.system('color')
 
 config_path = os.path.join(os.environ['APPDATA'], 'viihdecli', 'settings.ini')
 config = configparser.ConfigParser()
-
 config.read(config_path)
 platform = config['Download settings']['platform']
+
+columns_path = os.path.join(os.environ['APPDATA'], 'viihdecli', 'columns.ini')
+columns = configparser.ConfigParser()
+columns.read(columns_path)
 
 def create_number_list(number_string, last_item):
     number_string = number_string.replace(',', ' ')
@@ -203,6 +206,7 @@ def handle_folders(folder_tree, headers, move_recordings = False, folder_dict = 
                 config['Folder shortcuts'] = {}
                 config['Download folders'] = {}
                 config.read(config_path)
+                columns.read(columns_path)
                 platform = config['Download settings']['platform']
                 print('Asetukset päivitetty.')
                 continue
@@ -210,6 +214,10 @@ def handle_folders(folder_tree, headers, move_recordings = False, folder_dict = 
                 print('Avataan ' + config_path + ' Muistiossa.')
                 print('Muokattuasi asetustiedostoa kirjoita ' + command_strings.RELOAD_CONFIG + ' päivittääksesi asetukset.')
                 webbrowser.open(config_path)
+            elif folder_number == command_strings.OPEN_COLUMNS:
+                print('Avataan ' + columns_path + ' Muistiossa.')
+                print('Muokattuasi asetustiedostoa kirjoita ' + command_strings.RELOAD_CONFIG + ' päivittääksesi asetukset.')
+                webbrowser.open(columns_path)
             else:
                 print('Komentoa ei tunnistettu.')
                 continue
@@ -266,7 +274,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
     all_filtered_list = update_all_filtered_list(recording_list, all_recordings)
     print_descriptions = False
     if list_recordings:
-        print_recordings(folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+        print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
     if list_only:
         return
     filtered_recordings = {}
@@ -300,6 +308,11 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 viihdehelp.print_help('sorting', trash)
                 print()
 
+            elif f_string == command_strings.SHOW_WIDTH:
+                print()
+                show_terminal_width(columns, len(all_filtered_list), trash)
+                print()
+
             elif f_string == command_strings.SHOW_QUOTA:
                 account_quota = viihdeapi.get_quota(headers, platform)
                 seconds = account_quota['secondsLeft']
@@ -318,7 +331,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 all_filtered = update_all_filtered(all_recordings, filtered_recordings)
                 all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
                 if len(filtered_recordings) > 0:
-                    print_recordings(folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                    print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
 
             elif f_string.startswith(command_strings.CLEAR_FILTER):
                 f_split = int(f_string.split(' ', 1)[1])
@@ -328,13 +341,13 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 all_filtered = update_all_filtered(all_recordings, filtered_recordings)
                 all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
                 if len(filtered_recordings) > 0:
-                    print_recordings(folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                    print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
 
             elif f_string == command_strings.LIST_FILTERED:
                 if len(filtered_recordings) == 0:
                     all_filtered = all_recordings
                     all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
-                print_recordings(folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
 
             elif f_string == command_strings.LIST_FILTERS:
                 print('\nAktiiviset suotimet:')
@@ -365,7 +378,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                         all_filtered = update_all_filtered(all_recordings, filtered_recordings)
                     all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
                     if filtered_recordings or config['General settings'].getboolean('print all'):
-                        print_recordings(folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                        print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
                 else:
                     print('Tallenteita ei voi päivittää duplikaatteja käsitellessä.')
 
@@ -472,7 +485,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                     filtered_recordings[dict_key][1].add(all_filtered_list[x]['programId'])
                 all_filtered = update_all_filtered(all_recordings, filtered_recordings)
                 all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
-                print_recordings(folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
 
             elif f_string.startswith(command_strings.PLAY_RECORDING):
                 if trash:
@@ -491,7 +504,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
 
             elif f_string == command_strings.PRINT_DESCRIPTIONS:
                 print_descriptions = not print_descriptions
-                print_recordings(folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
 
             elif f_string.startswith(command_strings.SHOW_INFO):
                 f_split = f_string.split(' ', 1)
@@ -671,7 +684,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 filtered_recordings = filter_recordings(recording_list, filtered_recordings, not_in, 'folder', [folder_id, folder_dict[folder_id][0]])
                 all_filtered = update_all_filtered(all_recordings, filtered_recordings)
                 all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
-                print_recordings(folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
 
             elif f_string.startswith(command_strings.SORT_RECORDINGS) or f_string.startswith(command_strings.SORT_RECORDINGS_DESC):
                 f_split = f_string.split(' ', 1)
@@ -689,12 +702,13 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                     recording_list = sort_recordings(recording_list, sort_orders[f_split[1]], rev_order)
                     all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
                     if config['General settings'].getboolean('print all') or len(filtered_recordings) > 0:
-                        print_recordings(folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                        print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
 
             elif f_string == command_strings.RELOAD_CONFIG:
                 config['Folder shortcuts'] = {}
                 config['Download folders'] = {}
                 config.read(config_path)
+                columns.read(columns_path)
                 platform = config['Download settings']['platform']
                 print('Asetukset päivitetty.')
 
@@ -702,6 +716,11 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 print('Avataan ' + config_path + ' Muistiossa.')
                 print('Muokattuasi asetustiedostoa kirjoita ' + command_strings.RELOAD_CONFIG + ' päivittääksesi asetukset.')
                 webbrowser.open(config_path)
+
+            elif f_string == command_strings.OPEN_COLUMNS:
+                print('Avataan ' + columns_path + ' Muistiossa.')
+                print('Muokattuasi asetustiedostoa kirjoita ' + command_strings.RELOAD_CONFIG + ' päivittääksesi asetukset.')
+                webbrowser.open(columns_path)
 
             # elif f_string.startswith(command_strings.SET_FOLDER_SHORTCUT_NUMBER):
                 # f_split = f_string.split(' ', 1)[1].split(':', 1)
@@ -743,7 +762,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 filtered_recordings = filter_recordings(recording_list, filtered_recordings, not_in, f_split[0], f_split[1].upper())
                 all_filtered = update_all_filtered(all_recordings, filtered_recordings)
                 all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
-                print_recordings(folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
         except:
             print('Virheellinen komento.')
             # raise
