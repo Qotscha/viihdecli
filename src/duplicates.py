@@ -40,7 +40,7 @@ def list_duplicates(recording_list, mode = 2, use_description = True, use_name =
         max_dur_diff_sec = 60 * max_dur_diff
     else:
         use_dur_diff = False
-    duplicates_found = [0] * folder_length
+    duplicates_found = [False] * folder_length
     duplicate_list = [None] * folder_length
     duplicate_set = set()
     i = 0
