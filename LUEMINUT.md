@@ -2,10 +2,10 @@
 Komentorivityökalu Elisa Viihteen tallenteiden hallintaan, katseluun ja lataukseen.
 ## Vaatimukset
 * Windows-käyttöjärjestelmä
-* Python 3.9 tai uudempi
-* FFmpeg tallenteiden lataukseen
+* [Python](https://www.python.org/) 3.8 tai uudempi
+* [FFmpeg](https://www.ffmpeg.org/) tallenteiden lataukseen
 ## Asennus
-Käytä pip-paketinhallintajärjestelmää asentaaksesi tai päivittääksesi ohjelman ja sen suorittamiseen tarvittavat kirjastot [keyring](https://pypi.org/project/keyring/) ja [requests](https://pypi.org/project/requests/) sekä tallenteiden lataukseen tarvittavan työkalun [ViihdexDL](https://test.pypi.org/project/viihdexdl/).
+Käytä pip-paketinhallintajärjestelmää asentaaksesi tai päivittääksesi ohjelman ja sen suorittamiseen tarvittavat kirjastot [keyring](https://pypi.org/project/keyring/) ja [requests](https://pypi.org/project/requests/) sekä tallenteiden lataukseen tarvittavan työkalun [ViihdexDL](https://pypi.org/project/viihdexdl/).
 ```
 pip install --extra-index-url https://test.pypi.org/simple/ -U viihdecli
 ```
@@ -21,7 +21,7 @@ Ohjelma lataa FFmpeg:tä käyttäen ViihdexDL:n avulla tallenteen, jonka [elisav
 
 Myös yhden kansion kaikki tallenteet on mahdollista ladata. Tällöin URLin tulee olla muotoa https://elisaviihde.fi/tallenteet/kansio/123/sivu/1 tai pääkansion osalta https://elisaviihde.fi/tallenteet/sivu/1.
 ### \[f\] Kansiot
-Ohjelma listaa Elisa Viihteen tallennekansiot. Voit siirtyä valitsemaasi kansioon syöttämällä kansion numeron (sarake #). Muut komennot:
+Ohjelma listaa Elisa Viihteen tallennekansiot. Voit siirtyä valitsemaasi kansioon syöttämällä kansion numeron (sarake #). Komennolla `h` saa ruudulle alla näkyvän listauksen muista komennoista.
 ```
 Komento             Selite
 ENTER               Hyväksy/Palaa/Poistu
@@ -37,26 +37,29 @@ del #               Poista kansio #
 l                   Listaa nykyisen kansion tallenteet
 r                   Päivitä kansiot
 dl                  Lataa nykyisen kansion tallenteet
-lf                  Listaa kansioiden pikavalinnat
+q                   Näytä jäljellä oleva tallennustila
 fs NIMI             Lisää nykyinen kansio pikavalinnaksi NIMI
+lf                  Listaa kansioiden pikavalinnat
 ld                  Näydä nykyinen latauskansio ja pikavalinnat
 df POLKU            Aseta latauskansioksi POLKU
 ds NIMI             Aseta pikavalinta NIMI latauskansioksi
 dp NIMI             Lisää nykyinen latauskansio pikavalinnaksi NIMI
 dp NIMI | POLKU     Lisää latauskansio POLKU pikavalinnaksi NIMI
-rc                  Päivitä asetukset tiedostosta settings.ini
-oc                  Avaa settings.ini Muistiossa
+rc                  Päivitä asetukset tiedostoista settings.ini ja columns.ini
+o                   Avaa settings.ini Muistiossa
+oc                  Avaa columns.ini Muistiossa
 ```
 Kun kansion tallenteet listataan, hallitaan tallenteita seuraavassa luvussa kuvatulla tavalla.
 ### \[a\] Kaikki tallenteet
-Tässä käyttötilassa kaikkia Elisa Viihteen tallenteita voidaan käsitellä yhtensä kokonaisuutena riippumatta niiden kansioista. Komennot:
+Tässä käyttötilassa kaikkia Elisa Viihteen tallenteita voidaan käsitellä yhtensä kokonaisuutena riippumatta niiden kansioista. Näkymää voi mukauttaa asetustiedostoa `%APPDATA%\viihdecli` käyttäen. Kyseisen tiedoston, jota käsitellään tarkemmin alempana, saa avattua komennolla `oc` Muistiossa. Muistiossa. Komennolla `h` saa listauksen käytettävissä olevista komennoista.
 ```
 Komento             Selite
 ENTER               Hyväksy/Palaa/Poistu
 h                   Näytä tämä listaus
 q                   Näytä jäljellä oleva tallennustila
 l                   Listaa suodatetut tallenteet
-pd                  Näytä tallenteiden kuvaukset
+sw                  Näytä tallenteiden listaukseen tarvittava terminaalin leveys
+pd                  Näytä/piilota tallenteiden kuvaukset
 sh                  Näytä lajitteluavaimet
 s %                 Järjestä tallenteet nousevasti avaimen % mukaisesti (ks. LUEMINUT)
 sd %                Järjestä tallenteet laskevasti avaimen % mukaisesti (ks. LUEMINUT)
@@ -83,16 +86,18 @@ rm ##               Poista tallenteet ## Elisa Viihteen roskakoriin
 m ##                Siirrä tallenteet ## valittavaan kansioon
 m ## > NIMI         Siirrä tallenteet ## kansioon, jonka pikavalinta on NIMI
 m ## _ #            Siirrä tallenteet ## kansioon, jossa tallenne # sijaitsee
-lf                  Listaa kansioiden pikavalinnat
+q                   Näytä jäljellä oleva tallennustila
 fs NIMI             Lisää valittava kansio pikavalinnaksi NIMI
 fs NIMI | #         Lisää tallenteen # sisältävä kansio pikavalinnaksi NIMI
+lf                  Listaa kansioiden pikavalinnat
 ld                  Näydä nykyinen latauskansio ja pikavalinnat
 df POLKU            Aseta latauskansioksi POLKU
 ds NIMI             Aseta pikavalinta NIMI latauskansioksi
 dp NIMI             Lisää nykyinen latauskansio pikavalinnaksi NIMI
 dp NIMI | POLKU     Lisää latauskansio POLKU pikavalinnaksi NIMI
-rc                  Päivitä asetukset tiedostosta settings.ini
-oc                  Avaa settings.ini Muistiossa
+rc                  Päivitä asetukset tiedostoista settings.ini ja columns.ini
+o                   Avaa settings.ini Muistiossa
+oc                  Avaa columns.ini Muistiossa
 ```
 #### Tallenteisiin viittaaminen
 Tallenteisiin viitataan sarakkeessa # tai -# näkyvällä numerolla. Komentolistauksessa esiintyvä ## tarkoittaa tallennejoukkoa. Alla olevat esimerkit havannollistavat useisiin tallenteisiin viittaamista.
@@ -356,5 +361,25 @@ prompt overwrite            Jos tallenne on jo ladattu, kysy ylikirjoitetaanko
 Listaus kansioiden pikavalinnoista, joita voi hyödyntää tallenteita siirtäessä.
 ### [Download folders]
 Listaus latauskansioiden pikavalinnoista.
+## Asetustiedosto columns.ini
+Tallennenäkymää saa mukautettua tiedostoa `%APPDATA%\viihdecli\columns.ini` käyttäen. Näkymä on oletuksena asetettu 120 merkkiä leveään terminaali-ikkunaan mahtuvaksi. Roskakorille (Recycle bin) on eri asetukset kuin muille tallenteille (Recordings).
+```
+Asetus          Selite
+spacing         sarakkeiden väli
+negative        -#
+start day       viikonpäivä, jona tallenne alkoi
+start date      tallenteen alkamispäivä
+start time      tallenteen alkamiskellonaika
+end day         viikonpäivä, jona tallenne päättyi
+end date        tallenteen päättymispäivä
+end time        tallenteen päättymiskellonaika
+channel         kanava
+duration        kesto
+name            tallenteen nimi
+folder          tallenteen kansio
+show imdb       näytä IMDB-arvosana
+show live       näytä merkintä, jos tallenne ei ole päättynyt
+```
+Tallenteen kanavalle, nimelle ja kansiolle määritellään sarakkeen leveys (0 piilottaa sarakkeen paitsi nimisarake on aina vähintään 20 merkkiä leveä). Muut sarakkeet ovat joko näkyvissä (true) tai eivät ole (false). Roskakorin (Recycle bin) osalta saa tallenteen aloitus- ja lopetusajan kaltaisesti määritettyä tallenteen lopullisen poistumisen ajankohdan (removal) näkymisen.
 ## Lisenssi
 Sovellus on julkaistu MIT-lisenssillä (ks. tiedosto LICENSE).
