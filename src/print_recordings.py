@@ -117,7 +117,7 @@ def print_recordings(config, folder_dict, recording_list, hl_set = set(), print_
             hl = '\033[31m'
             padding += 5
         if x['recordingState'] == 'ongoing' and columns.getboolean('show live'):
-            live = ' \033[31m[LIVE]'
+            live = ' \033[91m[LIVE]'
             extra += 7
             padding += 5
         if 'imdbRating' in x and columns.getboolean('show imdb'):
