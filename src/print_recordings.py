@@ -81,11 +81,11 @@ def print_recordings(config, folder_dict, recording_list, hl_set = set(), print_
     c = get_format_list(n, ms, columns, trash)
     t_width, t_lines = os.get_terminal_size()
     n_width = sum([i[0] for i in c])
-    c[7][0] = max(t_width - n_width + c[7][0] - 1, 0)
+    c[7][0] = max(t_width - n_width + c[7][0], 0)
     if not c[7][0]: c[7][1] = ''
     c = tuple(tuple(i) for i in c)
-    for col in c:
-        print(col)
+    # for col in c:
+        # print(col)
     if trash:
         header_row = f'{c[0][1]:<{c[0][0]}}{c[1][1]:<{c[1][0]}}{c[8][1]:<{c[8][0]}}{c[2][1]:<{c[2][0]}}{c[3][1]:<{c[3][0]}}' \
                      f'{c[4][1]:<{c[4][0]}}{c[5][1]:<{c[5][0]}}{c[6][1]:<{c[6][0]}}{c[7][1]:<{c[7][0]}}'
@@ -127,7 +127,21 @@ def print_recordings(config, folder_dict, recording_list, hl_set = set(), print_
         name_length -= extra
         recording_name = f"{hl}{x['name'][:name_length].rstrip()}{imdb}{live}"
         # recording_name = f"{hl}{x['name'][:name_length-3].rstrip()}...{imdb}{live}" if name_length < len(x['name']) else f"{hl}{x['name'].rstrip()}{imdb}{live}"
-        folder_name = folder_dict[x['folderId']][0][:c[7][0]] if c[7][0] else ''
+        # fl = len(folder_dict[x['folderId']][0])
+        if c[7][0]:
+            folder_name = folder_dict[x['folderId']][0]
+            if c[7][0] < len(folder_name):
+                if folder_dict[x['folderId']][1] and len(folder_dict[x['folderId']][1]) > 1:
+                    folder_start = '.. /'
+                    for i in range(1, len(folder_dict[x['folderId']][1])):
+                        folder_name = f"{folder_start}{folder_name.split('/', i)[i]}"
+                        if len(folder_name) <= c[7][0]:
+                            break
+                        folder_start += ' .. /'
+                folder_name = folder_name[:c[7][0]]
+        else:
+            folder_name = ''
+        # folder_name = folder_dict[x['folderId']][0][:c[7][0]] if c[7][0] else ''
         if print_descriptions:
             recording_name += '\033[39m'
             if trash:
