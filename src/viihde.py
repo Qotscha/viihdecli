@@ -357,6 +357,8 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
 
             elif f_string == command_strings.REFRESH_RECORDINGS:
                 if not hl_set:
+                    folders = viihdeapi.get_folder_tree(headers, platform)
+                    folder_dict = create_folder_dict(folders)
                     if trash:
                         recording_list = viihdeapi.get_recycle(sorting_key, sorting_dir, headers, platform)['recordings']
                     elif folder is None:
@@ -368,13 +370,17 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                     all_recordings = set()
                     for x in recording_list:
                         all_recordings.add(x['programId'])
-                        if 'folderId' in x and not x['folderId'] in folder_dict:
-                            folders = viihdeapi.get_folder_tree(headers, platform)
-                            folder_dict = create_folder_dict(folders)
-                            break
+                        # if 'folderId' in x and not x['folderId'] in folder_dict:
+                            # folders = viihdeapi.get_folder_tree(headers, platform)
+                            # folder_dict = create_folder_dict(folders)
+                            # break
                     if not filtered_recordings:
                         all_filtered = all_recordings
                     else:
+                        filtered_recordings_ = {}
+                        for y in filtered_recordings.values():
+                            filtered_recordings_ = filter_recordings(recording_list, filtered_recordings_, y[0], y[2][0], y[2][1])
+                        filtered_recordings = filtered_recordings_
                         all_filtered = update_all_filtered(all_recordings, filtered_recordings)
                     all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
                     if filtered_recordings or config['General settings'].getboolean('print all'):
@@ -465,9 +471,6 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 start_date = date.fromisoformat(recording_info['startTime'].split()[0])
                 days_between = [start_date - timedelta(days=1), start_date + timedelta(days=2)]
                 channel = recording_info['channelName']
-                print(days_between)
-                print(channel)
-
                 filter_list = [[False, 'c', channel], [True, 'b', days_between[0].isoformat()], [False, 'b', days_between[1].isoformat()]]
                 filtered_recordings_ = {}
                 for x in filter_list:

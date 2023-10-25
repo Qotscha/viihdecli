@@ -15,7 +15,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
             dict_key = 'Kansiossa: ' + arguments[1]
         else:
             dict_key = 'Ei kansiossa: ' + arguments[1]
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         for x in recording_list:
             if arguments[0] != x['folderId']:
                 filtered_recordings[dict_key][1].add(x['programId'])
@@ -35,7 +35,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
             name_list.append({'names': name_split, 'last_name_only': last_name_only, 'first_name_only': first_name_only,
                              'last_name_starts': last_name_starts, 'first_name_starts': first_name_starts})
         dict_key += 'Näyttelijä: ' + arguments
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         for x in recording_list:
             if 'actors' in x:
                 for y in x['actors']:
@@ -85,7 +85,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
             name_list.append({'names': name_split, 'last_name_only': last_name_only, 'first_name_only': first_name_only,
                              'last_name_starts': last_name_starts, 'first_name_starts': first_name_starts})
         dict_key += 'Ohjaaja: ' + arguments
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         for x in recording_list:
             if 'directors' in x:
                 for y in x['directors']:
@@ -127,7 +127,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
             dict_key = 'Nimi sisältää: ' + arguments
         in_name = arguments.split('|')
         in_name = [x.strip() for x in in_name]
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         for x in recording_list:
             for y in in_name:
                 if y in x['name'].upper():
@@ -140,7 +140,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
             dict_key = 'Kuvaus sisältää: ' + arguments
         in_description = arguments.split('|')
         in_description = [x.strip() for x in in_description]
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         for x in recording_list:
             for y in in_description:
                 if 'description' in x and y in x['description'].upper():
@@ -150,7 +150,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
         dict_key += 'Kanavat: ' + arguments
         channels = arguments.split('|')
         channels = [x.strip() for x in channels]
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         for x in recording_list:
             for y in channels:
                 if y in x['channelName'].upper():
@@ -160,7 +160,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
         dict_key += 'Showtype: ' + arguments
         showtypes = arguments.split('|')
         showtypes = [x.strip() for x in showtypes]
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         for x in recording_list:
             for y in showtypes:
                 if 'showType' in x and y in x['showType'].upper():
@@ -170,7 +170,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
         dict_key += 'Genre: ' + arguments
         genres = arguments.split('|')
         genres = [x.strip() for x in genres]
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         for x in recording_list:
             if 'genres' in x:
                 for y in x['genres']:
@@ -182,7 +182,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
         dict_key += 'Sarja: ' + arguments
         series = arguments.split('|')
         series = [x.strip() for x in series]
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         for x in recording_list:
             if 'series' in x and 'title' in x['series']:
                 for y in series:
@@ -193,7 +193,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
         dict_key += 'Episodin nimi: ' + arguments
         series = arguments.split('|')
         series = [x.strip() for x in series]
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         for x in recording_list:
             if 'series' in x and 'episodeName' in x['series']:
                 for y in series:
@@ -204,7 +204,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
         dict_key += 'Kausi: ' + arguments
         seasons = arguments.replace('|', ' ').split()
         seasons = [int(x.strip()) for x in seasons]
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         for x in recording_list:
             if 'series' in x and 'season' in x['series'] and int(x['series']['season']) in seasons:
                 filtered_recordings[dict_key][1].add(x['programId'])
@@ -213,7 +213,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
         dict_key += 'Jakso: ' + arguments
         episodes = arguments.replace('|', ' ').split()
         episodes = [int(x.strip()) for x in episodes]
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         for x in recording_list:
             if 'series' in x and 'episode' in x['series'] and int(x['series']['episode']) in episodes:
                 filtered_recordings[dict_key][1].add(x['programId'])
@@ -223,7 +223,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
             dict_key = 'Kesto alle ' + arguments + ' minuuttia'
         else:
             dict_key = 'Kesto vähintään ' + arguments + ' minuuttia'
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         argument_split = arguments.split(':')
         if len(argument_split) == 1:
             duration = 60 * int(argument_split[0])
@@ -238,7 +238,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
             dict_key = 'Tallennus alkoi aikaisintaan ' + arguments
         else:
             dict_key = 'Tallennus alkoi ennen ' + arguments
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         if '.' in arguments:
             d = datetime.strptime(arguments, '%x')
         else:
@@ -253,7 +253,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
             dict_key = 'Tallennus päättyi aikaisintaan ' + arguments
         else:
             dict_key = 'Tallennus päättyi ennen ' + arguments
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         if '.' in arguments:
             d = datetime.strptime(arguments, '%x')
         else:
@@ -267,7 +267,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
         dict_key += 'Viikonpäivät: ' + arguments
         weekdays = arguments.split('|')
         weekdays = [x.strip() for x in weekdays]
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         for x in recording_list:
             for y in weekdays:
                 if datetime.fromisoformat(x['startTime']).strftime('%a').upper() == y:
@@ -278,7 +278,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
             dict_key = 'Tallennusaika jälkeen ' + arguments
         else:
             dict_key = 'Tallennusaika ennen ' + arguments
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         hours_minutes = [int(x.strip()) for x in arguments.split(':', 1)]
         t = time(hour = hours_minutes[0], minute = hours_minutes[1])
         for x in recording_list:
@@ -290,7 +290,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
             # dict_key = 'Katseluaikaa jäljellä vähintään ' + arguments + ' vuorokautta'
         # else:
             # dict_key = 'Katseluaikaa jäljellä alle ' + arguments + ' vuorokautta'
-        # filtered_recordings[dict_key] = [not_in, set()]
+        # filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         # for x in recording_list:
             # if x['remainingTime']['years'] * 365 + x['remainingTime']['months'] *
 
@@ -299,7 +299,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
             dict_key = 'IMDB-pisteet alle ' + arguments
         else:
             dict_key = 'IMDB-pisteet vähintään ' + arguments
-        filtered_recordings[dict_key] = [not_in, set()]
+        filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
         for x in recording_list:
             if 'imdbRating' in x:
                 # if x['imdbRating'] >= float(arguments) and x['showType'] == 'MOVIE':
