@@ -6,3 +6,7 @@
 
 0.19.3 (22.10.2023)
 - Korjattu käyttäjänimen tallentaminen asetustiedostoon
+
+0.20 (26.10.2023)
+- Lisätty mahdollisuus (columns.ini) mukauttaa tallennenäkymää
+- Korjattu tallenteiden päivittäminen: nyt myös uudet suodatusehdot täyttävät tallenteet näkyvät

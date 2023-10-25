@@ -7,7 +7,7 @@ Komentorivityökalu Elisa Viihteen tallenteiden hallintaan, katseluun ja latauks
 ## Asennus
 Käytä pip-paketinhallintajärjestelmää asentaaksesi tai päivittääksesi ohjelman ja sen suorittamiseen tarvittavat kirjastot [keyring](https://pypi.org/project/keyring/) ja [requests](https://pypi.org/project/requests/) sekä tallenteiden lataukseen tarvittavan työkalun [ViihdexDL](https://pypi.org/project/viihdexdl/).
 ```
-pip install --extra-index-url https://test.pypi.org/simple/ -U viihdecli
+pip install -U viihdecli
 ```
 ## Käyttö
 Käynnistä sovellus komennolla `viihdecli`. Ensimmäisellä käyttökerralla sovellus kysyy käyttäjätunnusta ja salasanaa, jotka on myös mahdollista tallentaa. Käyttäjätunnus tallennetaan tiedostoon settings.ini, joka luodaan sovelluksen ensimmäisellä käyttökerralla kansioon `%APPDATA%\viihdecli`. Salasana tallentuu keyring-kirjastoa käyttäen Windowsin tunnistetietojen hallintaan. Kirjautumisen jälkeen valitaan ohjelman käyttötila syöttämällä haluttua tilaa vastaava kirjain.
