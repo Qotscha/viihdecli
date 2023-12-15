@@ -151,6 +151,7 @@ def handle_folders(folder_tree, headers, move_recordings = False, folder_dict = 
                 pass
             elif folder_number == command_strings.REFRESH_RECORDINGS:
                 folder_tree = viihdeapi.get_folder_tree(headers, platform)
+                folder_dict = create_folder_dict(folder_tree)
             elif folder_number.isnumeric():
                 folder_numbers.append(int(folder_number))
             elif folder_number.startswith(command_strings.NEW_FOLDER):
