@@ -11,7 +11,7 @@ def clean_name(recording_name):
 
 def clean_description(description):
     cleaned_description = description.upper()
-    for x in ['(U)', 'UUSI KAUSI ALKAA', 'UUSI KAUSI', '(KAAPELI-TV)', 'TV-ENSI-ILTA', 'SUOMEN-ENSI-ILTA', 'SUOMEN ENSI-ILTA', 'SUOMEN TV-ENSI-ILTA', 'SUORA LÄHETYS']:
+    for x in ['(U)', 'UUSI SARJA ALKAA', 'UUSI KAUSI ALKAA', 'UUSI KAUSI', '(KAAPELI-TV)', 'SUOMEN-ENSI-ILTA', 'SUOMEN ENSI-ILTA', 'SUOMEN TV-ENSI-ILTA', 'TV-ENSI-ILTA', 'SUORA LÄHETYS']:
         if x in cleaned_description:
             cleaned_description = cleaned_description.replace(x, '')
             break
