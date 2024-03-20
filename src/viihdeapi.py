@@ -37,14 +37,14 @@ def get_folders(folder_id, headers, platform):
 def get_recordings(folder_id, sort_by, sort_order, headers, platform):
     recordings = requests.get(BASE_URL + 'rest/npvr/recordings/folder/' + folder_id +
                               '?v=2.1&page=0&sortBy=' + sort_by + '&sortOrder=' + sort_order
-                              + '&pageSize=10000&platform=' + platform + '&appVersion=1.0'
+                              + '&pageSize=99999&platform=' + platform + '&appVersion=1.0'
                               '&includeMetadata=true', headers=headers)
     return json.loads(recordings.text)
 
 def get_recycle(sort_by, sort_order, headers, platform):
     recordings = requests.get(BASE_URL + 'rest/npvr/recordings/recycle'
                                   '?v=1&page=0&sortBy=' + sort_by + '&sortOrder=' + sort_order
-                                  + '&pageSize=10000&platform=' + platform + '&appVersion=1.0'
+                                  + '&pageSize=99999&platform=' + platform + '&appVersion=1.0'
                                   '&includeMetadata=true', headers=headers)
     return json.loads(recordings.text)
 
@@ -63,7 +63,7 @@ def restore_recordings(recording_list, headers, platform):
 def get_all_recordings(sort_by, sort_order, headers, platform):
     recordings = requests.get(BASE_URL + 'rest/npvr/recordings'
                                   '?v=2.1&page=0&sortBy=' + sort_by + '&sortOrder=' + sort_order
-                                  + '&pageSize=10000&platform=' + platform + '&appVersion=1.0'
+                                  + '&pageSize=99999&platform=' + platform + '&appVersion=1.0'
                                   '&includeMetadata=true', headers=headers)
     return json.loads(recordings.text)
 
