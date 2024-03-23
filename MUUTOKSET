@@ -10,3 +10,7 @@
 0.20 (26.10.2023)
 - Lisätty mahdollisuus (columns.ini) mukauttaa tallennenäkymää
 - Korjattu tallenteiden päivittäminen: nyt myös uudet suodatusehdot täyttävät tallenteet näkyvät
+
+0.20.1 (23.3.2024)
+- Korjattu virheitä tallenteiden päivittämisessä
+- Parannettu tallenteiden kuvausten "siivoamista" duplikaattihaussa

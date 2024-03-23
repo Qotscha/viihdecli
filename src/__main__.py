@@ -8,7 +8,7 @@ os.system('color')
 def main():
     from . import version
     version = version.__version__
-    print('ViihdeCLI ' + version + ' (c) 2021-2023 Qotscha\n')
+    print('ViihdeCLI ' + version + ' (c) 2021-2024 Qotscha\n')
     # Load config file.
     config_location = os.path.join(os.environ['APPDATA'], 'viihdecli')
     config_path = os.path.join(config_location, 'settings.ini')
