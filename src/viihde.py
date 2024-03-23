@@ -380,7 +380,13 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                     else:
                         filtered_recordings_ = {}
                         for y in filtered_recordings.values():
-                            filtered_recordings_ = filter_recordings(recording_list, filtered_recordings_, y[0], y[2][0], y[2][1])
+                            if not y[2]:
+                                rem_set = y[1] & all_recordings
+                                if rem_set:
+                                    dict_key = 'Piilotettu listauksesta'
+                                    filtered_recordings_[dict_key] = [True, rem_set, None]
+                            else:
+                                filtered_recordings_ = filter_recordings(recording_list, filtered_recordings_, y[0], y[2][0], y[2][1])
                         filtered_recordings = filtered_recordings_
                         all_filtered = update_all_filtered(all_recordings, filtered_recordings)
                     all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
@@ -484,7 +490,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 to_remove = create_number_list(f_string.split(' ', 1)[1], len(all_filtered) - 1)
                 dict_key = 'Piilotettu listauksesta'
                 if dict_key not in filtered_recordings:
-                    filtered_recordings[dict_key] = [True, set()]
+                    filtered_recordings[dict_key] = [True, set(), None]
                 for x in to_remove:
                     filtered_recordings[dict_key][1].add(all_filtered_list[x]['programId'])
                 all_filtered = update_all_filtered(all_recordings, filtered_recordings)
