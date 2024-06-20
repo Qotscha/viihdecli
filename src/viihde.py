@@ -34,9 +34,17 @@ def create_number_list(number_string, last_item):
             x = x.strip('!')
         y = x.split(':')
         if len(y) == 1:
+            following = 0
+            previous = 0
+            while x[-1] in ['+', '-']:
+                if x[-1] == '+':
+                    following += 1
+                else:
+                    previous += 1
+                x = x[:-1]
             x_ = int(x)
             x_ = x_ + last_item + 1 if x_ < 0 else x_
-            number_list.append(x_)
+            to_add = list(range(x_ - previous, x_ + following + 1))
         elif len(y) == 2:
             y[0] = 0 if not y[0] else int(y[0])
             y[1] = last_item if not y[1] else int(y[1])

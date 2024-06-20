@@ -104,6 +104,11 @@ Tallenteisiin viitataan sarakkeessa # tai -# näkyvällä numerolla. Komentolist
 ```
 ##          Tallenteet
 1           1
+3+			3 ja 4
+3+++		3, 4, 5 ja 6
+5-			4 ja 5
+5---		2, 3, 4 ja 5
+5-+-		3, 4, 5 ja 6
 1 2         1 ja 2
 1:3         1, 2 ja 3
 1:2:7       1, 3, 5 ja 7
@@ -121,6 +126,7 @@ Jos viimeisen listatun tallenteen numero on 15, niin tallenteisiin viittaaminen 
 ```
 ##          Tallenteet
 -1          15
+-5+-+		10, 11, 12 ja 13
 -5 -6       11 ja 10
 2 -13       2 ja 3
 -15:2:-9    1, 3, 5 ja 7
