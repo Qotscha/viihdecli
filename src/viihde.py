@@ -68,6 +68,19 @@ def create_number_list(number_string, last_item):
         if to_add: number_list += to_add
     return number_list
 
+def set_filter_shortcut(shortcut, filter_string):
+    config['Filter shortcuts'][shortcut] = str(filter_string)
+    with open(config_path, 'w') as configfile:
+        config.write(configfile)
+    print('Luotiin pikavalinta \033[92m' + shortcut + '\033[39m komennolle \033[32m' + filter_string + '\033[39m.')
+
+def list_filter_shortcuts():
+    filter_dict = dict(config['Filter shortcuts'])
+    print('\n\033[92m' + '{:<20}{}'.format('Pikavalinta', 'Komento') + '\033[39m')
+    for x in filter_dict:
+        print('{:<20}{}'.format(x, filter_dict[x]))
+    print()
+
 def set_folder_shortcut(folder_id, shortcut, folder_name = '', print_msg = True):
     config['Folder shortcuts'][shortcut] = str(folder_id)
     with open(config_path, 'w') as configfile:
@@ -296,7 +309,9 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
             f_string = input(prompt).strip()
             if f_string == '':
                 return recordings_moved
-            elif f_string[0] == '!':
+            if f_string.startswith(command_strings.USE_FILTER_SHORTCUT):
+                f_string = config['Filter shortcuts'][f_string[1:].strip()]
+            if f_string[0] == '!':
                 not_in = True
                 f_string = f_string[1:]
             else:
@@ -746,6 +761,26 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 # folder_id = all_filtered_list[int(f_split[1].strip())]['folderId']
                 # set_folder_shortcut(folder_id, f_split[0].strip())
                 # print('Luotiin pikavalinta ' + f_split[0].strip() + ' kansiolle ' + str(folder_dict[int(folder_id)][0]) + '.')
+
+            elif f_string.startswith(command_strings.SET_FILTER_SHORTCUT):
+                # print(filtered_recordings)
+                f_split = f_string.split(' ', 1)[1].split('|', 1)
+                f_split = [x.strip() for x in f_split]
+                if len(f_split) == 1:
+                    f_list = next(reversed(filtered_recordings.values()))
+                    f_split.append(f_list[2][0] + ' ' + f_list[2][1].lower())
+                    if f_list[0]:
+                        f_split[1] = '!' + f_split[1]
+                elif f_split[1].isdigit():
+                    f_list = list(filtered_recordings.values())[int(f_split[1])]
+                    print(f_list)
+                    f_split[1] = (f_list[2][0] + ' ' + f_list[2][1].lower())
+                    if f_list[0]:
+                        f_split[1] = '!' + f_split[1]
+                set_filter_shortcut(f_split[0], f_split[1])
+
+            elif f_string == command_strings.LIST_FILTER_SHORTCUTS:
+                list_filter_shortcuts()
 
             elif f_string.startswith(command_strings.SET_FOLDER_SHORTCUT):
                 f_split = f_string.split(' ', 1)

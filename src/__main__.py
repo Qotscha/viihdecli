@@ -48,6 +48,7 @@ def main():
                                         'prompt overwrite': 'true' }
         config['Folder shortcuts'] = {'home': '0'}
         config['Download folders'] = {'esimerkki': 'C:\\Lataukset'}
+        config['Filter shortcuts'] = {'nelonen': 'c nelonen | hero | liv | jim'}
         # config.read('default.ini')
         with open(config_path, 'w') as configfile:
             config.write(configfile)
@@ -89,13 +90,15 @@ def main():
         with open(columns_path, 'w') as configfile:
             columns.write(configfile)
 
+    if not 'Filter shortcuts' in config:
+        config['Filter shortcuts'] = {'nelonen': 'c nelonen | hero | liv | jim'}
+        config_changed = True
+
     service_name = config['Login information']['service name']
 
     client_secret = 'nZhkFGz8Zd8w'
     api_key = 'Fjv8TK75OStLIz7Sc6jw6PvYQiIEgDtk'
     platform = config['Download settings']['platform']
-    # config['Download settings']['download folder'] = 'I:\Väliaikaiset'
-    # config_changed = True
 
     # Read/write username.
     save_username = ''

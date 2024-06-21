@@ -69,6 +69,11 @@ fh                  Listaa mahdolliset suotimet
 .                   Poista kaikki suotimet
 ..                  Poista viimeisin suodin
 . X                 Poista suodin numero X
++ NIMI              Lisää viimeisin suodin pikavalinnaksi NIMI
++ NIMI | X          Lisää suodin numero X pikavalinnaksi NIMI
++ NIMI | KOMENTO    Lisää KOMENTO pikavalinnaksi NIMI
+, NIMI              Käytä pikavalinnan NIMI suodinta
+ff                  Listaa suodinten pikavalinnat
 cd #                Näytä tallennetta # edeltävät ja seuraavat tallenteet
 rem ##              Suodata pois tallenteet ##
 ex                  Suodata pois valittavassa kansiossa sijaitsevat tallenteet
