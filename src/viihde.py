@@ -68,17 +68,36 @@ def create_number_list(number_string, last_item):
         if to_add: number_list += to_add
     return number_list
 
-def set_filter_shortcut(shortcut, filter_string):
-    config['Filter shortcuts'][shortcut] = str(filter_string)
+def set_filter_shortcut(shortcut, f_list):
+    for i, x in enumerate(f_list):
+        if len(f_list) == 1:
+            config['Filter shortcuts'][shortcut] = x
+        else:
+            config['Filter shortcuts'][f'{shortcut}_{i}'] = x
     with open(config_path, 'w') as configfile:
         config.write(configfile)
-    print('Luotiin pikavalinta \033[92m' + shortcut + '\033[39m komennolle \033[32m' + filter_string + '\033[39m.')
+    print('Luotiin pikavalinta \033[92m' + shortcut + '\033[39m suotimille')
+    for x in f_list:
+        print('   ' + x)
 
 def list_filter_shortcuts():
     filter_dict = dict(config['Filter shortcuts'])
+    f_items = list(filter_dict.items())
     print('\n\033[92m' + '{:<20}{}'.format('Pikavalinta', 'Komento') + '\033[39m')
-    for x in filter_dict:
-        print('{:<20}{}'.format(x, filter_dict[x]))
+    f_group = False
+    f_i = 0
+    for i, x in enumerate(f_items):
+        if x[0].endswith('_0') and f'{x[0][:-1]}1' in filter_dict:
+            print(f'\033[32m{x[0][:-2]}\033[39m')
+            print('   {:<20}{}'.format(x[0], x[1]))
+            f_i = 1
+        elif f_i > 0 and x[0].endswith(f'_{f_i}'):
+            print('   {:<20}{}'.format(x[0], x[1]))
+            f_i += 1
+        else:
+            f_i = 0
+
+            print('{:<20}{}'.format(x[0].strip('_0'), x[1]))
     print()
 
 def set_folder_shortcut(folder_id, shortcut, folder_name = '', print_msg = True):
@@ -310,7 +329,28 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
             if f_string == '':
                 return recordings_moved
             if f_string.startswith(command_strings.USE_FILTER_SHORTCUT):
-                f_string = config['Filter shortcuts'][f_string[1:].strip()]
+                shortcut = f_string[1:].strip()
+                if shortcut in config['Filter shortcuts']:
+                    f_list = [config['Filter shortcuts'][shortcut]]
+                elif f'{shortcut}_0' in config['Filter shortcuts']:
+                    i = 0
+                    f_list = []
+                    while f'{shortcut}_{i}' in config['Filter shortcuts']:
+                        f_list.append(config['Filter shortcuts'][f'{shortcut}_{i}'])
+                        i += 1
+                for x in f_list:
+                    f_string = x
+                    if f_string[0] == '!':
+                        not_in = True
+                        f_string = f_string[1:]
+                    else:
+                        not_in = False
+                    f_split = f_string.split(' ', 1)
+                    filtered_recordings = filter_recordings(recording_list, filtered_recordings, not_in, f_split[0], f_split[1].upper())
+                    all_filtered = update_all_filtered(all_recordings, filtered_recordings)
+                    all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
+                    print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                continue
             if f_string[0] == '!':
                 not_in = True
                 f_string = f_string[1:]
@@ -763,21 +803,19 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 # print('Luotiin pikavalinta ' + f_split[0].strip() + ' kansiolle ' + str(folder_dict[int(folder_id)][0]) + '.')
 
             elif f_string.startswith(command_strings.SET_FILTER_SHORTCUT):
-                # print(filtered_recordings)
                 f_split = f_string.split(' ', 1)[1].split('|', 1)
                 f_split = [x.strip() for x in f_split]
+                f_list = [f'{"!" if x[0] else ""}{x[2][0]} {x[2][1]}'.lower() for x in list(filtered_recordings.values())]
                 if len(f_split) == 1:
-                    f_list = next(reversed(filtered_recordings.values()))
-                    f_split.append(f_list[2][0] + ' ' + f_list[2][1].lower())
-                    if f_list[0]:
-                        f_split[1] = '!' + f_split[1]
-                elif f_split[1].isdigit():
-                    f_list = list(filtered_recordings.values())[int(f_split[1])]
-                    print(f_list)
-                    f_split[1] = (f_list[2][0] + ' ' + f_list[2][1].lower())
-                    if f_list[0]:
-                        f_split[1] = '!' + f_split[1]
-                set_filter_shortcut(f_split[0], f_split[1])
+                    f_list = [f_list[-1]]
+                elif f_split[1] == 'a':
+                    pass
+                else:
+                    f_list_ = []
+                    for x in create_number_list(f_split[1], len(f_list) - 1):
+                        f_list_.append(f_list[x])
+                    f_list = f_list_
+                set_filter_shortcut(f_split[0], f_list)
 
             elif f_string == command_strings.LIST_FILTER_SHORTCUTS:
                 list_filter_shortcuts()
