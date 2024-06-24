@@ -1,5 +1,6 @@
 import configparser
 import os
+import re
 import json
 import webbrowser
 import time
@@ -68,17 +69,20 @@ def create_number_list(number_string, last_item):
         if to_add: number_list += to_add
     return number_list
 
-def set_filter_shortcut(shortcut, f_list):
+def set_filter_shortcut(shortcut, f_list, so):
     for i, x in enumerate(f_list):
         if len(f_list) == 1:
             config['Filter shortcuts'][shortcut] = x
         else:
             config['Filter shortcuts'][f'{shortcut}_{i}'] = x
+    if so:
+        config['Filter shortcuts'][f'{shortcut}_so_'] = so
     with open(config_path, 'w') as configfile:
         config.write(configfile)
     print('Luotiin pikavalinta \033[92m' + shortcut + '\033[39m suotimille')
     for x in f_list:
         print('   ' + x)
+    print(f'   Sääntö: {so}')
 
 def list_filter_shortcuts():
     filter_dict = dict(config['Filter shortcuts'])
@@ -94,9 +98,10 @@ def list_filter_shortcuts():
         elif f_i > 0 and x[0].endswith(f'_{f_i}'):
             print('   {:<20}{}'.format(x[0], x[1]))
             f_i += 1
+        elif f_i > 0 and x[0].endswith('_so_'):
+            print(f'   Sääntö: {x[1]}')
         else:
             f_i = 0
-
             print('{:<20}{}'.format(x[0].strip('_0'), x[1]))
     print()
 
@@ -319,6 +324,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
     if list_only:
         return
     filtered_recordings = {}
+    set_operations = ''
     global platform
     if config['General settings'].getboolean('print help at start') and not hl_set:
         viihdehelp.print_help('recordings', trash)
@@ -330,6 +336,8 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 return recordings_moved
             if f_string.startswith(command_strings.USE_FILTER_SHORTCUT):
                 shortcut = f_string[1:].strip()
+                lf = len(filtered_recordings)
+                dup_filters = []
                 if shortcut in config['Filter shortcuts']:
                     f_list = [config['Filter shortcuts'][shortcut]]
                 elif f'{shortcut}_0' in config['Filter shortcuts']:
@@ -338,7 +346,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                     while f'{shortcut}_{i}' in config['Filter shortcuts']:
                         f_list.append(config['Filter shortcuts'][f'{shortcut}_{i}'])
                         i += 1
-                for x in f_list:
+                for i, x in enumerate(f_list):
                     f_string = x
                     if f_string[0] == '!':
                         not_in = True
@@ -346,10 +354,37 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                     else:
                         not_in = False
                     f_split = f_string.split(' ', 1)
-                    filtered_recordings = filter_recordings(recording_list, filtered_recordings, not_in, f_split[0], f_split[1].upper())
+                    valid_filter, filtered_recordings = filter_recordings(recording_list, filtered_recordings, not_in, f_split[0], f_split[1].upper())
+                    if valid_filter == 2:
+                        dup_filters.append(i)
+                if not dup_filters and f'{shortcut}_so_' in config['Filter shortcuts']:
+                    so = config['Filter shortcuts'][f'{shortcut}_so_']
+                    if lf == 0:
+                        set_operations = so
+                    else:
+                        so = re.sub(r'\d+', lambda x: str(int(x.group(0)) + lf), so)
+                        if not set_operations and lf > 0:
+                            set_operations = '0'
+                            for i in range(1, lf):
+                                set_operations += f' & {i}'
+                        set_operations = f'({set_operations}) & ({so})'
+                elif set_operations:
+                    so = str(lf)
+                    # print(f'Dups: {len(dup_filters)}')
+                    dups = 0
+                    for i in range(lf + 1, lf + len(f_list)):
+                        if i - lf - 1 not in dup_filters:
+                            so += f' & {i - dups}'
+                        else:
+                            dups += 1
+                    set_operations = f'({set_operations}) & ({so})'
+                if set_operations:
+                    # print(set_operations)
+                    all_filtered = custom_filter(all_recordings, filtered_recordings, set_operations)
+                else:
                     all_filtered = update_all_filtered(all_recordings, filtered_recordings)
-                    all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
-                    print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
+                print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
                 continue
             if f_string[0] == '!':
                 not_in = True
@@ -386,12 +421,14 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
 
             elif f_string == command_strings.CLEAR_FILTERS:
                 filtered_recordings = {}
+                set_operations = ''
                 print('Suotimet tyhjennetty.')
                 all_filtered = all_recordings
                 all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
 
             elif f_string == command_strings.CLEAR_LAST_FILTER:
                 print('Suodin poistettu: ' + str(filtered_recordings.popitem()[0]))
+                set_operations = ''
                 all_filtered = update_all_filtered(all_recordings, filtered_recordings)
                 all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
                 if len(filtered_recordings) > 0:
@@ -401,6 +438,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 f_split = int(f_string.split(' ', 1)[1])
                 remove_filter = list(filtered_recordings)[f_split]
                 filtered_recordings.pop(remove_filter)
+                set_operations = ''
                 print('Suodin poistettu: ' + str(remove_filter))
                 all_filtered = update_all_filtered(all_recordings, filtered_recordings)
                 all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
@@ -416,7 +454,12 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
             elif f_string == command_strings.LIST_FILTERS:
                 print('\nAktiiviset suotimet:')
                 for i, x in enumerate(list(filtered_recordings)):
-                    print(f'{str(i):<5}{x}')
+                    if set_operations and str(i) not in set_operations:
+                        print(f'\033[31m{str(i):<5}{x}\033[39m')
+                    else:
+                        print(f'{str(i):<5}{x}')
+                if set_operations:
+                    print('Sääntö: ' + set_operations)
                 print()
 
             elif f_string == command_strings.REFRESH_RECORDINGS:
@@ -449,9 +492,12 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                                     dict_key = 'Piilotettu listauksesta'
                                     filtered_recordings_[dict_key] = [True, rem_set, None]
                             else:
-                                filtered_recordings_ = filter_recordings(recording_list, filtered_recordings_, y[0], y[2][0], y[2][1])
+                                filtered_recordings_ = filter_recordings(recording_list, filtered_recordings_, y[0], y[2][0], y[2][1])[1]
                         filtered_recordings = filtered_recordings_
-                        all_filtered = update_all_filtered(all_recordings, filtered_recordings)
+                        if set_operations:
+                            all_filtered = custom_filter(all_recordings, filtered_recordings, set_operations)
+                        else:
+                            all_filtered = update_all_filtered(all_recordings, filtered_recordings)
                     all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
                     if filtered_recordings or config['General settings'].getboolean('print all'):
                         print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
@@ -544,7 +590,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 filter_list = [[False, 'c', channel], [True, 'b', days_between[0].isoformat()], [False, 'b', days_between[1].isoformat()]]
                 filtered_recordings_ = {}
                 for x in filter_list:
-                    filtered_recordings_ = filter_recordings(recording_list, filtered_recordings_, x[0], x[1], x[2].upper())
+                    filtered_recordings_ = filter_recordings(recording_list, filtered_recordings_, x[0], x[1], x[2].upper())[1]
                 all_filtered_ = update_all_filtered(all_recordings, filtered_recordings_)
                 all_filtered_list_ = update_all_filtered_list(recording_list, all_filtered_)
                 handle_recordings(folders, all_filtered_list_, headers, True, False, None, {recording_info['programId']}, 'Käsittele tallenteita: ')
@@ -754,10 +800,19 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                         folder_id = int(config['Folder shortcuts'][shortcut_split[1].strip()])
                     elif f_split.lstrip('-').isnumeric:
                         folder_id = all_filtered_list[int(f_split.strip())]['folderId']
-                filtered_recordings = filter_recordings(recording_list, filtered_recordings, not_in, 'folder', [folder_id, folder_dict[folder_id][0]])
-                all_filtered = update_all_filtered(all_recordings, filtered_recordings)
-                all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
-                print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                valid_filter, filtered_recordings = filter_recordings(recording_list, filtered_recordings, not_in, 'folder', [folder_id, folder_dict[folder_id][0]])
+                if valid_filter == 1:
+                    if set_operations:
+                        set_operations += f' & {len(filtered_recordings) - 1}'
+                        all_filtered = custom_filter(all_recordings, filtered_recordings, set_operations)
+                    else:
+                        all_filtered = update_all_filtered(all_recordings, filtered_recordings)
+                    all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
+                    print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                elif valid_filter == 2:
+                    print('Suodin on jo käytössä.')
+                else:
+                    print('Virheellinen komento.')
 
             elif f_string.startswith(command_strings.SORT_RECORDINGS) or f_string.startswith(command_strings.SORT_RECORDINGS_DESC):
                 f_split = f_string.split(' ', 1)
@@ -806,16 +861,17 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 f_split = f_string.split(' ', 1)[1].split('|', 1)
                 f_split = [x.strip() for x in f_split]
                 f_list = [f'{"!" if x[0] else ""}{x[2][0]} {x[2][1]}'.lower() for x in list(filtered_recordings.values())]
+                s_o = ''
                 if len(f_split) == 1:
                     f_list = [f_list[-1]]
                 elif f_split[1] == 'a':
-                    pass
+                    s_o = set_operations
                 else:
                     f_list_ = []
                     for x in create_number_list(f_split[1], len(f_list) - 1):
                         f_list_.append(f_list[x])
                     f_list = f_list_
-                set_filter_shortcut(f_split[0], f_list)
+                set_filter_shortcut(f_split[0], f_list, s_o)
 
             elif f_string == command_strings.LIST_FILTER_SHORTCUTS:
                 list_filter_shortcuts()
@@ -848,12 +904,35 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
             elif f_string == command_strings.LIST_FOLDER_SHORTCUTS:
                 list_folder_shortcuts(folder_dict)
 
+            elif f_string == 'd_filtered':
+                print(filtered_recordings)
+
+            elif f_string.startswith('cf'):
+                allowed_char = '0123456789a()|&-^ '
+                f_o = f_string.split(' ', 1)[1].strip()
+                # f_o = re.sub(' +', ' ', f_o)
+                if all(c in allowed_char for c in f_o):
+                    all_filtered = custom_filter(all_recordings, filtered_recordings, f_o)
+                    all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
+                    print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                    set_operations = f_o
+                else:
+                    print('Komento saa sisältää alun cf:n lisäksi ainostaan numeroita, kirjaimen a ja merkit (, ), |, &, - ja ^.')
             else:
                 f_split = f_string.split(' ', 1)
-                filtered_recordings = filter_recordings(recording_list, filtered_recordings, not_in, f_split[0], f_split[1].upper())
-                all_filtered = update_all_filtered(all_recordings, filtered_recordings)
-                all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
-                print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                valid_filter, filtered_recordings = filter_recordings(recording_list, filtered_recordings, not_in, f_split[0], f_split[1].upper())
+                if valid_filter == 1:
+                    if set_operations:
+                        set_operations += f' & {len(filtered_recordings) - 1}'
+                        all_filtered = custom_filter(all_recordings, filtered_recordings, set_operations)
+                    else:
+                        all_filtered = update_all_filtered(all_recordings, filtered_recordings)
+                    all_filtered_list = update_all_filtered_list(recording_list, all_filtered)
+                    print_recordings(columns, folder_dict, all_filtered_list, hl_set, print_descriptions, trash)
+                elif valid_filter == 2:
+                    print('Suodin on jo käytössä.')
+                else:
+                    print('Virheellinen komento.')
         except:
             print('Virheellinen komento.')
             # raise
@@ -891,6 +970,24 @@ def update_all_filtered(all_recordings, filtered_recordings):
             all_filtered = all_filtered & filtered_recordings[x][1]
         y += 1
     all_filtered = all_filtered & all_recordings
+    return all_filtered
+
+def custom_filter(all_recordings, filtered_recordings, operations):
+    # fv = [x[1] for x in list(filtered_recordings.values())]
+    fv = list(filtered_recordings.values())
+    # print(fv)
+    all_filtered = set()
+    operations = re.sub(r'\d+', r'fv[\g<0>]', operations)
+    for i, x in enumerate(fv):
+        # operations = operations.replace(str(i), f'fv[{i}]')
+        if x[0]:
+            operations = operations.replace(f'fv[{i}]', f'(a - fv[{i}])')
+        # print(operations)
+    operations = operations.replace('a', 'all_recordings')
+    operations = operations.replace(']', '][1]')
+    # print(operations)
+    # print(len(fv))
+    all_filtered = eval(operations)
     return all_filtered
 
 def update_all_filtered_list(recording_list, recording_set):
