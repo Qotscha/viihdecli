@@ -907,7 +907,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
             elif f_string == 'd_filtered':
                 print(filtered_recordings)
 
-            elif f_string.startswith('cf'):
+            elif f_string.startswith(command_strings.CUSTOM_FILTER):
                 allowed_char = '0123456789a()|&-^ '
                 f_o = f_string.split(' ', 1)[1].strip()
                 # f_o = re.sub(' +', ' ', f_o)

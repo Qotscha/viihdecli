@@ -337,14 +337,18 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
         else:
             return 2, filtered_recordings
 
-    # elif f == 'r':
-        # if not_in:
-            # dict_key = 'Katseluaikaa jäljellä vähintään ' + arguments + ' vuorokautta'
-        # else:
-            # dict_key = 'Katseluaikaa jäljellä alle ' + arguments + ' vuorokautta'
-        # filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
-        # for x in recording_list:
-            # if x['remainingTime']['years'] * 365 + x['remainingTime']['months'] *
+    elif f == 'tr':
+        if not_in:
+            dict_key = 'Katseluaikaa jäljellä vähintään ' + arguments + ' vuorokautta'
+        else:
+            dict_key = 'Katseluaikaa jäljellä alle ' + arguments + ' vuorokautta'
+        if not dict_key in filtered_recordings.keys():
+            filtered_recordings[dict_key] = [not_in, set(), [f, arguments]]
+            for x in recording_list:
+                if int(x['remainingTime']['years']) * 365 + int(x['remainingTime']['months']) * 30 + int(x['remainingTime']['days']) < int(arguments):
+                    filtered_recordings[dict_key][1].add(x['programId'])
+        else:
+            return 2, filtered_recordings
 
     elif f == command_strings.F_IMDB:
         if not_in:
