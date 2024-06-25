@@ -174,6 +174,7 @@ c TEKSTI                      Tallenteen kanavanimi sisältää tekstin
 dur X tai HH:MM               Tallenteen pituus vähintään X min tai HH tuntia, MM minuuttia
 b YYYY-MM-DD tai DD.MM.YYYY   Tallennus alkoi ennen päivämäärää
 be YYYY-MM-DD tai DD.MM.YYYY  Tallennus päättyi ennen päivämäärää
+tr X                          Tallenteen katseluaikaa jäljellä alle X vuorokautta
 w VIIKONPÄIVÄN LYHENNE        Tallennus alkoi viikonpäivänä
 t HH:MM                       Tallennus alkoi ennen kellonaikaa
 a SUKUNIMI, ETUNIMI           Näyttelijä esintyy tallenteella
@@ -249,6 +250,10 @@ Aktiiviset suotimet:
 4    Viikonpäivät: TI | TO
 5    Tallennusaika ennen 14:00
 ```
+Oletuksena suodatuksissa siis listataan tallenteet, jotka muodostavat kunkin suodattimen määrittämien joukkojen leikkauksen. Komennolla `cf` ja käyttämällä joukko-operaattoreita | (unioni), & (leikkaus), - (erotus) ja ^ (symmetrinen erotus) sekä suodattimen numeroa ja mahdollisesti sulkuja voidaan suodatusta mukauttaa. Esimerkiksi yllä olevien suodatinten ollessa käytössä komento `cf 5 & (0 ^ 1)` tarkoittaa, että nyt listataankin tallenteet jotka täyttävät ehdon 5 ja lisäksi joko ehdon 0 tai 1.
+
+Suodin tai suotimet on myös mahdollista tallentaa asetustiedostoon myöhempää käyttöä varten komennolla `+ NIMI | X`, missä X tarkoittaa valittuja suotimia. Suotimien numeroihin viittaamisessa toimivat samat periaatteet kuin tallenteiden tapauksessakin, eli esim. 2:4 tarkoittaa suotimia 2,3 ja 4. Kirjain a tarkoittaa kaikkia suotimia ja tällöin myös mahdollisesti käytössä olevat joukko-operaatiot tallentuvat. Komento `+ NIMI` tallentaa ainostaan viimeisimmän suotimen. Tallennetun suotimen tai suotimet saa otettua käyttöön komennolla `, NIMI`. 
+
 Tämän jälkeen voimmekin sitten vaikkapa katsoa haluamamme tallenteen.
 #### Duplikaattien poisto
 Duplikaattien haku tapahtuu kulloinkin suodatettuna olevasta joukosta. Se, mikä ehdot täyttävistä tallenteista lasketaan duplikaatiksi ja mikä "alkuperäiseksi", riippuu tallenteiden järjestyksestä. Ensimmäisenä listauksessa oleva on originaali. Jos siis esim. haluaa säilyttää viimeisimpänä tallennetun, on syytä ennen duplikaattien hakua järjestää tallenteet laskevasti alkamisajan mukaan.
