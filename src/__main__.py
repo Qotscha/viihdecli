@@ -5,55 +5,83 @@ import webbrowser
 import keyring
 os.system('color')
 
+def create_config(config_path, config = None, write_config = True):
+    config_changed = False
+    default_config = configparser.ConfigParser()
+    default_config['Login information'] = { 'service name': 'Elisa Viihde API',
+                                            'username': '',
+                                            'auto login': 'false' }
+    default_config['General settings'] = { 'print help at start': 'true',
+                                           'move prompt min': '1',
+                                           'print at start': 'true',
+                                           'print all': 'true',
+                                           'sorting key': 'startTime',
+                                           'sorting dir': 'asc',
+                                           'recycle duplicates': 'false' }
+    default_config['Download settings'] = { 'player': '\"C:\\Program Files\\MPC-HC\\mpc-hc64.exe\"',
+                                            'platform': 'ios',
+                                            'download folder': '',
+                                            'folder structure': 'false',
+                                            'season episode filename': 'false',
+                                            'audio languages': 'fin, dut',
+                                            'subtitle languages': 'fi, nl',
+                                            'default audio': 'fin, dut',
+                                            'default subtitle': 'fin, dut',
+                                            'visual impaired': 'dut',
+                                            'hearing impaired': 'dut',
+                                            'maximum bandwidth': '0',
+                                            'maximum width': '0',
+                                            'maximum height': '0',
+                                            'file extension': 'mkv',
+                                            'external subtitles': 'true',
+                                            'ffmpeg options': '-v error -stats',
+                                            'ffmpeg video codec': 'copy',
+                                            'ffmpeg audio codec': 'copy',
+                                            'save description': 'true',
+                                            'prompt overwrite': 'true' }
+    defaults = [{'home': '0'}, {'esimerkki': 'C:\\Lataukset'}, {'nelonen': 'c nelonen | hero | liv | jim'}]
+    if not config:
+        config = default_config
+        config_changed = True
+    else:
+        for s in ['Login information', 'General settings', 'Download settings']:
+            if s in config:
+                for k in default_config[s]:
+                    if k in config[s]:
+                        default_config[s][k] = config[s][k]
+                    else:
+                        config_changed = True
+            else:
+                config_changed = True
+    for i, s in enumerate(['Folder shortcuts', 'Download folders', 'Filter shortcuts']):
+        if s in config and not len(config[s]) == 0:
+            default_config[s] = config[s]
+        else:
+            default_config[s] = defaults[i]
+            config_changed = True
+    if write_config and config_changed:
+        if not os.path.exists(config_path):
+            os.mkdir(config_path)
+        with open(os.path.join(config_path, 'settings.ini'), 'w') as configfile:
+            default_config.write(configfile)
+    return default_config
+
 def main():
     from . import version
     version = version.__version__
     print('ViihdeCLI ' + version + ' (c) 2021-2024 Qotscha\n')
     # Load config file.
-    config_location = os.path.join(os.environ['APPDATA'], 'viihdecli')
-    config_path = os.path.join(config_location, 'settings.ini')
-    config = configparser.ConfigParser()
-    cfg_list = config.read(config_path)
-    if not cfg_list:
-        if not os.path.exists(os.path.join(config_location)):
-            os.mkdir(os.path.join(config_location))
-        config['Login information'] = { 'service name': 'Elisa Viihde API',
-                                        'username': '',
-                                        'auto login': 'false' }
-        config['General settings'] = { 'print help at start': 'true',
-                                       'move prompt min': '1',
-                                       'print at start': 'true',
-                                       'print all': 'true',
-                                       'sorting key': 'startTime',
-                                       'sorting dir': 'asc',
-                                       'recycle duplicates': 'false' }
-        config['Download settings'] = { 'player': '\"C:\\Program Files\\MPC-HC\\mpc-hc64.exe\"',
-                                        'platform': 'ios',
-                                        'download folder': '',
-                                        'folder structure': 'false',
-                                        'season episode filename': 'false',
-                                        'audio languages': 'fin, dut',
-                                        'subtitle languages': 'fi, nl',
-                                        'default audio': 'fin, dut',
-                                        'default subtitle': 'fin, dut',
-                                        'visual impaired': 'dut',
-                                        'hearing impaired': 'dut',
-                                        'maximum bandwidth': '0',
-                                        'file extension': 'mkv',
-                                        'external subtitles': 'true',
-                                        'ffmpeg options': '-v error -stats',
-                                        'ffmpeg video codec': 'copy',
-                                        'ffmpeg audio codec': 'copy',
-                                        'save description': 'true',
-                                        'prompt overwrite': 'true' }
-        config['Folder shortcuts'] = {'home': '0'}
-        config['Download folders'] = {'esimerkki': 'C:\\Lataukset'}
-        config['Filter shortcuts'] = {'nelonen': 'c nelonen | hero | liv | jim'}
-        # config.read('default.ini')
-        with open(config_path, 'w') as configfile:
-            config.write(configfile)
+    config_folder = os.path.join(os.environ['APPDATA'], 'viihdecli')
+    config_path = os.path.join(config_folder, 'settings.ini')
+    if not os.path.exists(config_path):
+        config = create_config(config_folder)
+    else:
+        config = configparser.ConfigParser()
+        config.read(config_path)
+        config = create_config(config_folder, config)
+    # config_path = os.path.join(config_folder, 'settings.ini')
     config_changed = False
-    columns_path = os.path.join(config_location, 'columns.ini')
+    columns_path = os.path.join(config_folder, 'columns.ini')
     if not os.path.isfile(columns_path):
         columns = configparser.ConfigParser()
         columns['Recordings'] = { 'spacing': '3',
@@ -89,10 +117,6 @@ def main():
                                    'show live': 'true' }
         with open(columns_path, 'w') as configfile:
             columns.write(configfile)
-
-    if not 'Filter shortcuts' in config:
-        config['Filter shortcuts'] = {'nelonen': 'c nelonen | hero | liv | jim'}
-        config_changed = True
 
     service_name = config['Login information']['service name']
 
