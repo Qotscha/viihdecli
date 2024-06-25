@@ -14,3 +14,9 @@
 0.20.1 (23.3.2024)
 - Korjattu virheitä tallenteiden päivittämisessä
 - Parannettu tallenteiden kuvausten "siivoamista" duplikaattihaussa
+
+0.21 (25.6.2024)
+- Lisätty mahdollisuus käyttää merkkejä '+' ja '-' tallenteiden valinnassa (ks. LUEMINUT)
+- Lisätty mahdollisuus käyttää suotimille pikavalintoja
+- Lisätty mahdollisuus käyttää suodattamisessa vapaavalintaisia joukko-operaatioita (ks. LUEMINUT)
+- Lisätty suodin tallenteen jäljellä olevalle katseluajalle
