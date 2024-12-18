@@ -8,10 +8,15 @@ import json
 from subprocess import Popen
 from . import viihdeapi
 from . import naming_rules
-os.system('color')
+if os.name == 'nt':
+    os.system('color')
 
 def main():
-    config_path = os.path.join(os.environ['APPDATA'], 'viihdecli', 'settings.ini')
+    if os.name == 'nt':
+        config_folder = os.path.join(os.environ['APPDATA'], 'viihdecli')
+    elif os.name == 'posix' and sys.platform != 'darwin':
+        config_folder = os.path.join(os.path.expanduser('~/.config'), 'viihdecli')
+    config_path = os.path.join(config_folder, 'settings.ini')
     config = configparser.ConfigParser()
     config.read(config_path)
     dl_settings = config['Download settings']
@@ -20,20 +25,21 @@ def main():
 
     arguments = sys.argv[1:]
     dl_list = []
-    for x in range(len(arguments)):
-        if arguments[x].isnumeric():
-            dl_list.append(arguments[x])
+    for i, x in enumerate(arguments):
+        if x.isnumeric():
+            dl_list.append(x)
         else:
-            header_string = ' '.join(arguments[x:])
+            header_string = ' '.join(arguments[i:])
             break
 
     queue_size = len(dl_list) - 1
     headers = ast.literal_eval(header_string)
 
     if dl_folder == '':
-        print('Latauskansio: ' + os.getcwd() + '\\')
+        # print('Latauskansio: ' + os.getcwd() + '\\')
+        print('Latauskansio: ' + os.getcwd())
     elif not dl_folder.endswith('\\'):
-        dl_folder += '\\'
+        # dl_folder += '\\'
         if not os.path.isdir(dl_folder): os.makedirs(dl_folder)
         print('Latauskansio: ' + dl_folder)
     else:
@@ -41,7 +47,7 @@ def main():
         print('Latauskansio: ' + dl_folder)
 
     if folder_structure:
-        with open(os.path.join(os.environ['APPDATA'], 'viihdecli', 'kansiot.json')) as f:
+        with open(os.path.join(config_folder, 'kansiot.json')) as f:
             folders = json.load(f)
 
     for recording in dl_list:
@@ -81,7 +87,7 @@ def main():
         elif queue_size > 1:
             print('\nJonossa \033[36m' + str(queue_size) + '\033[39m tallennetta.')
         print()
-        Popen(cmd).wait()
+        Popen(cmd, shell=True).wait()
         print()
         time.sleep(2)
         queue_size -= 1

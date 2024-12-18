@@ -3,7 +3,6 @@ import os
 import textwrap
 # import time
 from datetime import datetime, timedelta
-os.system('color')
 locale.setlocale(locale.LC_ALL, '')
 
 def get_date_format(spacing, wd, sd, st, long, short):
