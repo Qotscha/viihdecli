@@ -87,41 +87,61 @@ def main():
     # config_path = os.path.join(config_folder, 'settings.ini')
     config_changed = False
     columns_path = os.path.join(config_folder, 'columns.ini')
+    default_columns = configparser.ConfigParser()
+    default_columns['Recordings'] = { 'spacing': '3',
+                              'negative': 'true',
+                              'start day': 'true',
+                              'start date': 'true',
+                              'start time': 'true',
+                              'end day': 'false',
+                              'end date': 'false',
+                              'end time': 'true',
+                              'channel': '9',
+                              'duration': 'true',
+                              'name': '41',
+                              'season': 'false',
+                              'episode': 'false',
+                              'folder': '10',
+                              'show imdb': 'true',
+                              'show live': 'true' }
+    default_columns['Recycle bin'] = { 'spacing': '3',
+                               'negative': 'false',
+                               'removal day': 'false',
+                               'removal date': 'true',
+                               'removal time': 'false',
+                               'start day': 'true',
+                               'start date': 'true',
+                               'start time': 'true',
+                               'end day': 'false',
+                               'end date': 'false',
+                               'end time': 'false',
+                               'channel': '9',
+                               'duration': 'true',
+                               'name': '43',
+                               'season': 'false',
+                               'episode': 'false',
+                               'folder': '13',
+                               'show imdb': 'true',
+                               'show live': 'true' }
+    columns_changed = False
     if not os.path.isfile(columns_path):
+        columns_changed = True
+    else:
         columns = configparser.ConfigParser()
-        columns['Recordings'] = { 'spacing': '3',
-                                  'negative': 'true',
-                                  'start day': 'true',
-                                  'start date': 'true',
-                                  'start time': 'true',
-                                  'end day': 'false',
-                                  'end date': 'false',
-                                  'end time': 'true',
-                                  'channel': '9',
-                                  'duration': 'true',
-                                  'name': '41',
-                                  'folder': '12',
-                                  'show imdb': 'true',
-                                  'show live': 'true' }
-        columns['Recycle bin'] = { 'spacing': '3',
-                                   'negative': 'false',
-                                   'removal day': 'false',
-                                   'removal date': 'true',
-                                   'removal time': 'false',
-                                   'start day': 'true',
-                                   'start date': 'true',
-                                   'start time': 'true',
-                                   'end day': 'false',
-                                   'end date': 'false',
-                                   'end time': 'false',
-                                   'channel': '9',
-                                   'duration': 'true',
-                                   'name': '43',
-                                   'folder': '13',
-                                   'show imdb': 'true',
-                                   'show live': 'true' }
+        columns.read(columns_path)
+        for s in ['Recordings', 'Recycle bin']:
+            if s in columns:
+                for k in default_columns[s]:
+                    if k in columns[s]:
+                        default_columns[s][k] = columns[s][k]
+                    else:
+                        columns_changed = True
+            else:
+                columns_changed = True
+    if columns_changed:
         with open(columns_path, 'w') as configfile:
-            columns.write(configfile)
+            default_columns.write(configfile)
+
 
     service_name = config['Login information']['service name']
 

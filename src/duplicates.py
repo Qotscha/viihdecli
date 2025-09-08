@@ -24,6 +24,8 @@ def list_duplicates(recording_list, mode = 2, use_description = True, use_name =
     folder_length = len(recording_list)
     # duplicates = [[None] * 10 for i in range(folder_length)]
     # stime = time.time()
+    use_episode = False
+    if mode == 8: use_episode = True
     if mode != 0:
         use_name = False if mode == 5 else True
         use_description = False if mode == 5 else True
@@ -34,6 +36,9 @@ def list_duplicates(recording_list, mode = 2, use_description = True, use_name =
         descriptions_cleaned = [clean_description(x['description']) if 'description' in x else '' for x in recording_list]
     if use_metadata:
         metadata_ids = [x['metadataId'] if 'metadataId' in x else 0 for x in recording_list]
+    if use_episode:
+        episodes = [x['series'].get('episode') if 'series' in x else None for x in recording_list]
+        print(episodes)
     if max_dur_diff is not None:
         use_dur_diff = True
         durations = [x['duration'] for x in recording_list]
@@ -173,6 +178,25 @@ def list_duplicates(recording_list, mode = 2, use_description = True, use_name =
                 if ( (metadata_ids[x] and metadata_ids[x] == metadata_ids[y]) or (names_cleaned[x] == names_cleaned[y] and
                      ((descriptions_cleaned[y] and descriptions_cleaned[x].startswith(descriptions_cleaned[y])) or
                      (descriptions_cleaned[x] and descriptions_cleaned[y].startswith(descriptions_cleaned[x])))) ):
+                    if not duplicates_found[x]:
+                        duplicates_found[x] = True
+                        duplicate_list[i] = recording_list[x]
+                        i += 1
+                    duplicates_found[y] = True
+                    duplicate_list[i] = recording_list[y]
+                    duplicate_set.add(recording_list[y]['programId'])
+                    i += 1
+
+    elif mode == 8:
+        # Name AND description AND episode number
+        print('Haetaan duplikaatteja (nimi JA kuvaus JA jakson numero).')
+        for x in range(folder_length):
+            if duplicates_found[x] or not descriptions_cleaned[x] or not episodes[x]:
+                continue
+            for y in range(x + 1, folder_length):
+                if duplicates_found[y] or not descriptions_cleaned[y] or not episodes[y]:
+                    continue
+                if names_cleaned[x] == names_cleaned[y] and (descriptions_cleaned[x].startswith(descriptions_cleaned[y]) or descriptions_cleaned[y].startswith(descriptions_cleaned[x])) and episodes[x] == episodes[y]:
                     if not duplicates_found[x]:
                         duplicates_found[x] = True
                         duplicate_list[i] = recording_list[x]
