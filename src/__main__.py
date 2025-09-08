@@ -1,9 +1,11 @@
 import configparser
 import getpass
 import os
+import sys
 import webbrowser
 import keyring
-os.system('color')
+if os.name == 'nt':
+    os.system('color')
 
 def create_config(config_path, config = None, write_config = True):
     config_changed = False
@@ -61,7 +63,7 @@ def create_config(config_path, config = None, write_config = True):
             config_changed = True
     if write_config and config_changed:
         if not os.path.exists(config_path):
-            os.mkdir(config_path)
+            os.makedirs(config_path)
         with open(os.path.join(config_path, 'settings.ini'), 'w') as configfile:
             default_config.write(configfile)
     return default_config
@@ -71,7 +73,10 @@ def main():
     version = version.__version__
     print('ViihdeCLI ' + version + ' (c) 2021-2024 Qotscha\n')
     # Load config file.
-    config_folder = os.path.join(os.environ['APPDATA'], 'viihdecli')
+    if os.name == 'nt':
+        config_folder = os.path.join(os.environ['APPDATA'], 'viihdecli')
+    elif os.name == 'posix' and sys.platform != 'darwin':
+        config_folder = os.path.join(os.path.expanduser('~/.config'), 'viihdecli')
     config_path = os.path.join(config_folder, 'settings.ini')
     if not os.path.exists(config_path):
         config = create_config(config_folder)
@@ -82,41 +87,61 @@ def main():
     # config_path = os.path.join(config_folder, 'settings.ini')
     config_changed = False
     columns_path = os.path.join(config_folder, 'columns.ini')
+    default_columns = configparser.ConfigParser()
+    default_columns['Recordings'] = { 'spacing': '3',
+                              'negative': 'true',
+                              'start day': 'true',
+                              'start date': 'true',
+                              'start time': 'true',
+                              'end day': 'false',
+                              'end date': 'false',
+                              'end time': 'true',
+                              'channel': '9',
+                              'duration': 'true',
+                              'name': '41',
+                              'season': 'false',
+                              'episode': 'false',
+                              'folder': '10',
+                              'show imdb': 'true',
+                              'show live': 'true' }
+    default_columns['Recycle bin'] = { 'spacing': '3',
+                               'negative': 'false',
+                               'removal day': 'false',
+                               'removal date': 'true',
+                               'removal time': 'false',
+                               'start day': 'true',
+                               'start date': 'true',
+                               'start time': 'true',
+                               'end day': 'false',
+                               'end date': 'false',
+                               'end time': 'false',
+                               'channel': '9',
+                               'duration': 'true',
+                               'name': '43',
+                               'season': 'false',
+                               'episode': 'false',
+                               'folder': '13',
+                               'show imdb': 'true',
+                               'show live': 'true' }
+    columns_changed = False
     if not os.path.isfile(columns_path):
+        columns_changed = True
+    else:
         columns = configparser.ConfigParser()
-        columns['Recordings'] = { 'spacing': '3',
-                                  'negative': 'true',
-                                  'start day': 'true',
-                                  'start date': 'true',
-                                  'start time': 'true',
-                                  'end day': 'false',
-                                  'end date': 'false',
-                                  'end time': 'true',
-                                  'channel': '9',
-                                  'duration': 'true',
-                                  'name': '41',
-                                  'folder': '12',
-                                  'show imdb': 'true',
-                                  'show live': 'true' }
-        columns['Recycle bin'] = { 'spacing': '3',
-                                   'negative': 'false',
-                                   'removal day': 'false',
-                                   'removal date': 'true',
-                                   'removal time': 'false',
-                                   'start day': 'true',
-                                   'start date': 'true',
-                                   'start time': 'true',
-                                   'end day': 'false',
-                                   'end date': 'false',
-                                   'end time': 'false',
-                                   'channel': '9',
-                                   'duration': 'true',
-                                   'name': '43',
-                                   'folder': '13',
-                                   'show imdb': 'true',
-                                   'show live': 'true' }
+        columns.read(columns_path)
+        for s in ['Recordings', 'Recycle bin']:
+            if s in columns:
+                for k in default_columns[s]:
+                    if k in columns[s]:
+                        default_columns[s][k] = columns[s][k]
+                    else:
+                        columns_changed = True
+            else:
+                columns_changed = True
+    if columns_changed:
         with open(columns_path, 'w') as configfile:
-            columns.write(configfile)
+            default_columns.write(configfile)
+
 
     service_name = config['Login information']['service name']
 
@@ -151,11 +176,18 @@ def main():
 
     # Load/save password.
     save_password = ''
-    password = keyring.get_password(service_name, username)
+    keyring_works = True
+    try:
+        password = keyring.get_password(service_name, username)
+    except Exception as e:
+        keyring_works = False
+        password = None
+        print('Kirjastoa keyring ei voida käyttää.')
+        print(e)
     if password is None:
         print()
         password = getpass.getpass(prompt='Salasana: ')
-        if config['Login information'].getboolean('auto login') or save_username in ['k', 'y']:
+        if keyring_works and (config['Login information'].getboolean('auto login') or save_username in ['k', 'y']):
             save_password = input('Tallennetaanko salasana (k/e)? ').lower()
 
     from . import viihdeapi
@@ -173,8 +205,11 @@ def main():
         config['Login information']['username'] = ''
         with open(config_path, 'w') as configfile:
             config.write(configfile)
-        if not keyring.get_password(service_name, username) is None:
-            keyring.delete_password(service_name, username)
+        try:
+            if not keyring.get_password(service_name, username) is None:
+                keyring.delete_password(service_name, username)
+        except:
+            pass
         return
 
     from . import viihde

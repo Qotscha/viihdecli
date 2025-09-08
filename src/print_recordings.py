@@ -3,7 +3,6 @@ import os
 import textwrap
 # import time
 from datetime import datetime, timedelta
-os.system('color')
 locale.setlocale(locale.LC_ALL, '')
 
 def get_date_format(spacing, wd, sd, st, long, short):
@@ -46,16 +45,18 @@ def get_format_list(n, ms, columns, trash):
          [int(columns['channel']) + ms, 'Kanava'] if int(columns['channel']) else [0, ''],
          [4 + ms, 'Kesto'] if columns.getboolean('duration') else [0, ''],
          [int(columns['name']) + ms if int(columns['name']) > 20 else 20 + ms, 'Nimi'],
+         [4 + ms, 'Kausi'] if columns.getboolean('season') else [0, ''],
+         [4 + ms, 'Jakso'] if columns.getboolean('episode') else [0, ''],
          [int(columns['folder']), 'Kansio'] if int(columns['folder']) else [0, '']]
     # if not c[2][0][0]: c[2][1] = ''
     # if not c[3][0][0]: c[3][1] = ''
-    if c[4][0] < 7: c[4][1] = 'Kan.'
-    if c[5][0] < 6: c[5][1] = 'K.'
+    if c[4][0] and c[4][0] < 7: c[4][1] = 'Kan.'
+    if c[5][0] and c[5][0] < 6: c[5][1] = 'K.'
     if columns.getboolean('show imdb'): c[6][1] += ' [IMDB-arvosana]'
     if trash:
         c.append(get_date_format(ms, columns.getboolean('removal day'), columns.getboolean('removal date'),
                   columns.getboolean('removal time'), 'Poistuu', 'Poist.'))
-        # if not c[8][0][0]: c[8][1] = ''
+        # if not c[10][0][0]: c[10][1] = ''
     return c
 
 def show_terminal_width(config, n, trash):
@@ -81,17 +82,17 @@ def print_recordings(config, folder_dict, recording_list, hl_set = set(), print_
     c = get_format_list(n, ms, columns, trash)
     t_width, t_lines = os.get_terminal_size()
     n_width = sum([i[0] for i in c])
-    c[7][0] = max(t_width - n_width + c[7][0], 0)
-    if not c[7][0]: c[7][1] = ''
+    c[9][0] = max(t_width - n_width + c[9][0], 0)
+    if not c[9][0]: c[9][1] = ''
     c = tuple(tuple(i) for i in c)
     # for col in c:
         # print(col)
     if trash:
-        header_row = f'{c[0][1]:<{c[0][0]}}{c[1][1]:<{c[1][0]}}{c[8][1]:<{c[8][0]}}{c[2][1]:<{c[2][0]}}{c[3][1]:<{c[3][0]}}' \
-                     f'{c[4][1]:<{c[4][0]}}{c[5][1]:<{c[5][0]}}{c[6][1]:<{c[6][0]}}{c[7][1]:<{c[7][0]}}'
+        header_row = f'{c[0][1]:<{c[0][0]}}{c[1][1]:<{c[1][0]}}{c[10][1]:<{c[10][0]}}{c[2][1]:<{c[2][0]}}{c[3][1]:<{c[3][0]}}' \
+                     f'{c[4][1]:<{c[4][0]}}{c[5][1]:<{c[5][0]}}{c[6][1]:<{c[6][0]}}{c[7][1]:<{c[7][0]}}{c[8][1]:<{c[8][0]}}{c[9][1]:<{c[9][0]}}'
     else:
         header_row = f'{c[0][1]:<{c[0][0]}}{c[1][1]:<{c[1][0]}}{c[2][1]:<{c[2][0]}}{c[3][1]:<{c[3][0]}}{c[4][1]:<{c[4][0]}}' \
-                     f'{c[5][1]:<{c[5][0]}}{c[6][1]:<{c[6][0]}}{c[7][1]:<{c[7][0]}}'
+                     f'{c[5][1]:<{c[5][0]}}{c[6][1]:<{c[6][0]}}{c[7][1]:<{c[7][0]}}{c[8][1]:<{c[8][0]}}{c[9][1]:<{c[9][0]}}'
     y = 0
     z = - n if c[1][1] else ''
     print('\n\033[92m' + header_row + '\033[39m')
@@ -103,8 +104,8 @@ def print_recordings(config, folder_dict, recording_list, hl_set = set(), print_
         end_day = f"{datetime.fromisoformat(x['endTime']).strftime('%a')} " if c[3][2] else ''
         end_date = f"{end_day}{x['endTime'][c[3][3][0]:c[3][3][1]]}" if c[3][3] else end_day
         if trash:
-            removal_day = f"{datetime.fromisoformat(x['removalDate']).strftime('%a')} " if c[8][2] else ''
-            removal_date = f"\033[31m{removal_day}{x['removalDate'][c[8][3][0]:c[8][3][1]]}" if c[8][3] else f"\033[31m{removal_day}"
+            removal_day = f"{datetime.fromisoformat(x['removalDate']).strftime('%a')} " if c[10][2] else ''
+            removal_date = f"\033[31m{removal_day}{x['removalDate'][c[10][3][0]:c[10][3][1]]}" if c[10][3] else f"\033[31m{removal_day}"
         dur = str(timedelta(seconds=x['duration'])).rsplit(':',1)[0] if c[5][0] else ''
         channel = x['channelName'][:c[4][0] - ms] if c[4][0] else ''
         extra = 0
@@ -128,29 +129,37 @@ def print_recordings(config, folder_dict, recording_list, hl_set = set(), print_
         recording_name = f"{hl}{x['name'][:name_length].rstrip()}{imdb}{live}"
         # recording_name = f"{hl}{x['name'][:name_length-3].rstrip()}...{imdb}{live}" if name_length < len(x['name']) else f"{hl}{x['name'].rstrip()}{imdb}{live}"
         # fl = len(folder_dict[x['folderId']][0])
-        if c[7][0]:
+        if c[7][0] and 'series' in x and 'season' in x['series']:
+            season = x['series']['season']
+        else:
+            season = ''
+        if c[8][0] and 'series' in x and 'episode' in x['series']:
+            episode = x['series']['episode']
+        else:
+            episode = ''
+        if c[9][0]:
             folder_name = folder_dict[x['folderId']][0]
-            if c[7][0] < len(folder_name):
+            if c[9][0] < len(folder_name):
                 if folder_dict[x['folderId']][1] and len(folder_dict[x['folderId']][1]) > 1:
                     folder_start = '.. /'
                     for i in range(1, len(folder_dict[x['folderId']][1])):
                         folder_name = f"{folder_start}{folder_name.split('/', i)[i]}"
-                        if len(folder_name) <= c[7][0]:
+                        if len(folder_name) <= c[9][0]:
                             break
                         folder_start += ' .. /'
-                folder_name = folder_name[:c[7][0]]
+                folder_name = folder_name[:c[9][0]]
         else:
             folder_name = ''
-        # folder_name = folder_dict[x['folderId']][0][:c[7][0]] if c[7][0] else ''
+        # folder_name = folder_dict[x['folderId']][0][:c[9][0]] if c[9][0] else ''
         if print_descriptions:
             recording_name += '\033[39m'
             if trash:
                 removal_date += '\033[39m'
-                info_row = f"{y:<{c[0][0]}}{z:<{c[1][0]}}{removal_date:<{c[8][0]+10}}{start_date:<{c[2][0]}}{end_date:<{c[3][0]}}" \
-                           f"{channel:<{c[4][0]}}{dur:<{c[5][0]}}{recording_name:<{padding}}{folder_name:<{c[7][0]}}"
+                info_row = f"{y:<{c[0][0]}}{z:<{c[1][0]}}{removal_date:<{c[10][0]+10}}{start_date:<{c[2][0]}}{end_date:<{c[3][0]}}" \
+                           f"{channel:<{c[4][0]}}{dur:<{c[5][0]}}{recording_name:<{padding}}{season:<{c[7][0]}}{episode:<{c[8][0]}}{folder_name:<{c[9][0]}}"
             else:
                 info_row = f"{y:<{c[0][0]}}{z:<{c[1][0]}}{start_date:<{c[2][0]}}{end_date:<{c[3][0]}}{channel:<{c[4][0]}}" \
-                           f"{dur:<{c[5][0]}}{recording_name:<{padding}}{folder_name:<{c[7][0]}}"
+                           f"{dur:<{c[5][0]}}{recording_name:<{padding}}{season:<{c[7][0]}}{episode:<{c[8][0]}}{folder_name:<{c[9][0]}}"
             print(info_row)
             if 'description' in x:
                 desc_lines = textwrap.wrap(x['description'], width = t_width - 15)
@@ -163,21 +172,21 @@ def print_recordings(config, folder_dict, recording_list, hl_set = set(), print_
                 recording_name += '\033[36m'
                 if trash:
                     removal_date += '\033[36m'
-                    info_row = f"{y:<{c[0][0]}}{z:<{c[1][0]}}{removal_date:<{c[8][0]+10}}{start_date:<{c[2][0]}}" \
-                               f"{end_date:<{c[3][0]}}{channel:<{c[4][0]}}{dur:<{c[5][0]}}{recording_name:<{padding}}{folder_name:<{c[7][0]}}"
+                    info_row = f"{y:<{c[0][0]}}{z:<{c[1][0]}}{removal_date:<{c[10][0]+10}}{start_date:<{c[2][0]}}" \
+                               f"{end_date:<{c[3][0]}}{channel:<{c[4][0]}}{dur:<{c[5][0]}}{recording_name:<{padding}}{season:<{c[7][0]}}{episode:<{c[8][0]}}{folder_name:<{c[9][0]}}"
                 else:
                     info_row = f"{y:<{c[0][0]}}{z:<{c[1][0]}}{start_date:<{c[2][0]}}{end_date:<{c[3][0]}}{channel:<{c[4][0]}}" \
-                               f"{dur:<{c[5][0]}}{recording_name:<{padding}}{folder_name:<{c[7][0]}}"
+                               f"{dur:<{c[5][0]}}{recording_name:<{padding}}{season:<{c[7][0]}}{episode:<{c[8][0]}}{folder_name:<{c[9][0]}}"
                 print('\033[36m' + info_row + '\033[39m')
             else:
                 recording_name += '\033[39m'
                 if trash:
                     removal_date += '\033[39m'
-                    info_row = f"{y:<{c[0][0]}}{z:<{c[1][0]}}{removal_date:<{c[8][0]+10}}{start_date:<{c[2][0]}}" \
-                               f"{end_date:<{c[3][0]}}{channel:<{c[4][0]}}{dur:<{c[5][0]}}{recording_name:<{padding}}{folder_name:<{c[7][0]}}"
+                    info_row = f"{y:<{c[0][0]}}{z:<{c[1][0]}}{removal_date:<{c[10][0]+10}}{start_date:<{c[2][0]}}" \
+                               f"{end_date:<{c[3][0]}}{channel:<{c[4][0]}}{dur:<{c[5][0]}}{recording_name:<{padding}}{season:<{c[7][0]}}{episode:<{c[8][0]}}{folder_name:<{c[9][0]}}"
                 else:
                     info_row = f"{y:<{c[0][0]}}{z:<{c[1][0]}}{start_date:<{c[2][0]}}{end_date:<{c[3][0]}}{channel:<{c[4][0]}}" \
-                               f"{dur:<{c[5][0]}}{recording_name:<{padding}}{folder_name:<{c[7][0]}}"
+                               f"{dur:<{c[5][0]}}{recording_name:<{padding}}{season:<{c[7][0]}}{episode:<{c[8][0]}}{folder_name:<{c[9][0]}}"
                 print(info_row)
         y += 1
         if c[1][1]: z += 1

@@ -1,25 +1,31 @@
 import configparser
 import os
+import sys
 import re
 import json
 import webbrowser
 import time
 from datetime import date, timedelta
-from subprocess import Popen, CREATE_NEW_CONSOLE
+from subprocess import Popen
+if os.name == 'nt':
+    from subprocess import CREATE_NEW_CONSOLE
 from . import viihdeapi
 from . import command_strings
 from . import viihdehelp
 from .filter_recordings import filter_recordings
 from .print_recordings import print_recordings, show_terminal_width
 from .duplicates import list_duplicates
-os.system('color')
 
-config_path = os.path.join(os.environ['APPDATA'], 'viihdecli', 'settings.ini')
+if os.name == 'nt':
+    config_folder = os.path.join(os.environ['APPDATA'], 'viihdecli')
+elif os.name == 'posix' and sys.platform != 'darwin':
+    config_folder = os.path.join(os.path.expanduser('~/.config'), 'viihdecli')
+config_path = os.path.join(config_folder, 'settings.ini')
 config = configparser.ConfigParser()
 config.read(config_path)
 platform = config['Download settings']['platform']
 
-columns_path = os.path.join(os.environ['APPDATA'], 'viihdecli', 'columns.ini')
+columns_path = os.path.join(config_folder, 'columns.ini')
 columns = configparser.ConfigParser()
 columns.read(columns_path)
 
@@ -293,7 +299,11 @@ def create_folder_dict(folder_tree):
     folder_dict = folder_loop(folder_dict, folder_tree['folders'], folder_tree['id'], '', tuple())
     folder_dict[0] = ['(Tallennekansio)', None, '(Tallennekansio)']
     if config['Download settings'].getboolean('folder structure'):
-        with open (os.path.join(os.environ['APPDATA'], 'viihdecli', 'kansiot.json'), 'w') as f:
+        if os.name == 'nt':
+            config_folder = os.path.join(os.environ['APPDATA'], 'viihdecli')
+        elif os.name == 'posix' and sys.platform != 'darwin':
+            config_folder = os.path.join(os.path.expanduser('~/.config'), 'viihdecli')
+        with open (os.path.join(config_folder, 'kansiot.json'), 'w') as f:
             json.dump(folder_dict, f)
     return folder_dict
 
@@ -509,7 +519,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                     stime = time.time()
                     f_split = f_string.split(' ', 1)
                     if len(f_split) > 1:
-                        if f_split[1] in ['1', '2', '3', '4', '5', '6', '7']:
+                        if f_split[1] in ['1', '2', '3', '4', '5', '6', '7', '8']:
                             mode = int(f_split[1])
                             duplicate_set, duplicate_list = list_duplicates(all_filtered_list.copy(), mode)
                         else:
@@ -653,9 +663,12 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                         dl_list = create_number_list(f_split[1], len(all_filtered) - 1)
                         for x in dl_list:
                             cmd += str(all_filtered_list[x]['programId']) + ' '
-                    cmd += str(headers)
+                    cmd += f'"{str(headers)}"'
                     # print(cmd)
-                    Popen(cmd, creationflags=CREATE_NEW_CONSOLE)
+                    if os.name == 'nt':
+                        Popen(cmd, creationflags=CREATE_NEW_CONSOLE)
+                    else:
+                        Popen(cmd, shell=True).wait()
 
             elif f_string.startswith(command_strings.RESTORE_RECORDINGS):
                 f_split = f_string.split(' ', 1)

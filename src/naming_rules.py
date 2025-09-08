@@ -1,8 +1,13 @@
 import configparser
-import os.path
+import os
+import sys
 import re
 
-config_path = os.path.join(os.environ['APPDATA'], 'viihdecli', 'settings.ini')
+if os.name == 'nt':
+    config_folder = os.path.join(os.environ['APPDATA'], 'viihdecli')
+elif os.name == 'posix' and sys.platform != 'darwin':
+    config_folder = os.path.join(os.path.expanduser('~/.config'), 'viihdecli')
+config_path = os.path.join(config_folder, 'settings.ini')
 config = configparser.ConfigParser()
 config.read(config_path)
 dl_settings = config['Download settings']
