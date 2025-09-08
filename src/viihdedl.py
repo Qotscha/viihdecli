@@ -75,7 +75,7 @@ def main():
 
     # Save description
         if dl_settings.getboolean('save description'):
-            file = open(filename + '.txt', 'w')
+            file = open(filename + '.txt', 'w', encoding = 'utf-8')
             if 'description' in recording_info:
                 file.write(recording_info['description'])
             else:
