@@ -20,3 +20,9 @@
 - Lisätty mahdollisuus käyttää suotimille pikavalintoja
 - Lisätty mahdollisuus käyttää suodattamisessa vapaavalintaisia joukko-operaatioita (ks. LUEMINUT)
 - Lisätty suodin tallenteen jäljellä olevalle katseluajalle
+
+0.22 (12.11.2025)
+- Korjattu tallenteiden katselu ja lataaminen
+- Lisätty osittainen tuki UNIX-järjestelmille
+- Lisätty mahdollisuus näyttää kauden ja jakson numero tallennenäkymässä
+- Parannettu duplikaattihakua

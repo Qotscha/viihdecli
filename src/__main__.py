@@ -71,7 +71,7 @@ def create_config(config_path, config = None, write_config = True):
 def main():
     from . import version
     version = version.__version__
-    print('ViihdeCLI ' + version + ' (c) 2021-2024 Qotscha\n')
+    print('ViihdeCLI ' + version + ' (c) 2021-2025 Qotscha\n')
     # Load config file.
     if os.name == 'nt':
         config_folder = os.path.join(os.environ['APPDATA'], 'viihdecli')
