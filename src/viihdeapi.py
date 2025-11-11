@@ -76,7 +76,7 @@ def get_recording_info(recording_id, headers, platform):
 def get_recording_url(recording_id, headers, platform):
     payload = '{"cdnServiceOptions":["s_ttml"],"protocol":"hls","applicationVersion":"1","deviceId":"123","drmPlatform":"ios"}'
     headers_ = {'content-type': 'application/json; charset=UTF-8', 'Authorization': headers['Authorization']}
-    recording_url = requests.post('https://watchable-api.dc.elisa.fi/V3/recordings/play-options/'
+    recording_url = requests.post('https://viihde-watchable-api-prod.csf.elisa.fi/V5/recordings/play-options/'
                                 + recording_id + '/' + platform, data=payload, headers=headers_)
     # return json.loads(recording_url.text)['url']
     temp_url = json.loads(recording_url.text)['requestRouterUrl']
