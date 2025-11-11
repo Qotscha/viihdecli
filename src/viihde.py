@@ -519,7 +519,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                     stime = time.time()
                     f_split = f_string.split(' ', 1)
                     if len(f_split) > 1:
-                        if f_split[1] in ['1', '2', '3', '4', '5', '6', '7', '8']:
+                        if f_split[1] in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
                             mode = int(f_split[1])
                             duplicate_set, duplicate_list = list_duplicates(all_filtered_list.copy(), mode)
                         else:

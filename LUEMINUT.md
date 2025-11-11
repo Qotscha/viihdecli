@@ -269,6 +269,8 @@ Moodi   Ehdot
 5       metadataId
 6       nimi JA (kuvaus TAI metadataId)
 7       (nimi JA kuvaus) TAI metadataId
+8       nimi JA kuvaus JA jakson numero
+9       nimi JA jakson numero
 ```
 Lisäksi on mahdollista käyttää haluttua yhdistelmää ehdoista nimi (n), kuvaus (d), metadataId (m) ja ero pituudessa korkeintaan X minuuttia (.X). Esimerkkejä:
 ```
