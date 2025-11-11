@@ -73,24 +73,17 @@ def get_recording_info(recording_id, headers, platform):
                                  headers=headers)
     return json.loads(recording_info.text)
 
-def get_recording_url(recording_id, headers, platform):
-    payload = '{"cdnServiceOptions":["s_ttml"],"protocol":"hls","applicationVersion":"1","deviceId":"123","drmPlatform":"ios"}'
+def get_recording_url(recording_id, headers, platform, return_response = False):
+    payload = {"cdnServiceOptions":["s_ttml"],"protocol":"hls","applicationVersion":"1","deviceId":"123","drmPlatform":"ios"}
     headers_ = {'content-type': 'application/json; charset=UTF-8', 'Authorization': headers['Authorization']}
     recording_url = requests.post('https://viihde-watchable-api-prod.csf.elisa.fi/V5/recordings/play-options/'
-                                + recording_id + '/' + platform, data=payload, headers=headers_)
-    # return json.loads(recording_url.text)['url']
+                                + recording_id + '/' + platform, json=payload, headers=headers_)
     temp_url = json.loads(recording_url.text)['requestRouterUrl']
-    perm_url = requests.get(temp_url).url
-    return perm_url
-
-def get_recording_url_(recording_id, headers, platform):
-    recording_url = requests.get('https://rest-api.elisaviihde.fi/rest/npvr/recordings/url/'
-                                + recording_id + '?v=2&platform=' + platform
-                                + '&appVersion=1.0', headers=headers)
-    # return json.loads(recording_url.text)['url']
-    temp_url = json.loads(recording_url.text)['url']
-    perm_url = requests.get(temp_url).url
-    return perm_url
+    perm_url = requests.get(temp_url)
+    if return_response:
+        return perm_url.text, perm_url.url
+    else:
+        return perm_url.url
 
 def move_recordings(recording_list, folder_id, headers, platform):
     payload = {'programId': recording_list, 'folderId': folder_id}

@@ -27,6 +27,7 @@ SHOW_DESCRIPTION = 'd '
 PRINT_DESCRIPTIONS = 'pd'
 SHOW_INFO = 'i '
 SHOW_URL = 'u '
+SHOW_MANIFEST = 'mf '
 DOWNLOAD_RECORDINGS = 'dl '         # a for all
 DELETE_RECORDINGS = 'del '          # a for all, d for duplicates
 MOVE_RECORDINGS = 'm '              # command recordings _ recordingNumber OR command recordings > shortcutName OR command recordings, a for all

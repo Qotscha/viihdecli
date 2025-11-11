@@ -648,6 +648,12 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                 recording_url = play_recording(str(all_filtered_list[int(f_split[1])]['programId']), headers, True)
                 print('Tallenteen ' + all_filtered_list[int(f_split[1])]['name'] + ' URL: ' + recording_url)
 
+            elif f_string.startswith(command_strings.SHOW_MANIFEST):
+                f_split = f_string.split(' ', 1)
+                manifest = viihdeapi.get_recording_url(str(all_filtered_list[int(f_split[1])]['programId']), headers, platform, True)
+                print(manifest[0])
+                print(manifest[1])
+
             elif f_string.startswith(command_strings.DOWNLOAD_RECORDINGS):
                 if trash:
                     print('Viihteen roskakorissa olevia tallenteita ei voida ladata.')
