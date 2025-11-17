@@ -26,3 +26,7 @@
 - Lisätty osittainen tuki UNIX-järjestelmille
 - Lisätty mahdollisuus näyttää kauden ja jakson numero tallennenäkymässä
 - Parannettu duplikaattihakua
+
+0.22.1 (17.11.2025)
+- Korjattu ja parannettu duplikaattien hakua
+- Korjattu jokerimerkin * toimimattomuus näyttelijän ja ohjaajan etunimissä
