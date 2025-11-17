@@ -34,7 +34,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
             last_name_only = len(name_split) == 1
             first_name_only = name_split[0] == ''
             last_name_starts = not first_name_only and name_split[0].endswith('*')
-            first_name_starts = not last_name_only and name_split[0].endswith('*')
+            first_name_starts = not last_name_only and name_split[1].endswith('*')
             name_split = [y.rstrip('*') for y in name_split]
             name_list.append({'names': name_split, 'last_name_only': last_name_only, 'first_name_only': first_name_only,
                              'last_name_starts': last_name_starts, 'first_name_starts': first_name_starts})
@@ -87,7 +87,7 @@ def filter_recordings(recording_list, filtered_recordings, not_in, f, arguments)
             last_name_only = len(name_split) == 1
             first_name_only = name_split[0] == ''
             last_name_starts = not first_name_only and name_split[0].endswith('*')
-            first_name_starts = not last_name_only and name_split[0].endswith('*')
+            first_name_starts = not last_name_only and name_split[1].endswith('*')
             name_split = [y.rstrip('*') for y in name_split]
             name_list.append({'names': name_split, 'last_name_only': last_name_only, 'first_name_only': first_name_only,
                              'last_name_starts': last_name_starts, 'first_name_starts': first_name_starts})
