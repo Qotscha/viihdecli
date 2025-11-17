@@ -524,6 +524,7 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                             duplicate_set, duplicate_list = list_duplicates(all_filtered_list.copy(), mode)
                         else:
                             mode = 0
+                            use_episode = 'e' in f_split[1]
                             use_description = 'd' in f_split[1]
                             use_name = 'n' in f_split[1]
                             use_metadata = 'm' in f_split[1]
@@ -537,7 +538,8 @@ def handle_recordings(folders, recording_list, headers, list_recordings = False,
                                     else:
                                         break
                                 if digits: max_dur_diff = int(digits)
-                            duplicate_set, duplicate_list = list_duplicates(all_filtered_list.copy(), mode, use_description, use_name, use_metadata, max_dur_diff)
+                            duplicate_set, duplicate_list = list_duplicates(all_filtered_list.copy(), mode, use_description,
+                                                                            use_name, use_metadata, use_episode, max_dur_diff)
                     else:
                         duplicate_set, duplicate_list = list_duplicates(all_filtered_list.copy())
 

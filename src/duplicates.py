@@ -20,7 +20,7 @@ def clean_description(description):
     cleaned_description = cleaned_description.strip(':!. ')
     return cleaned_description
 
-def list_duplicates(recording_list, mode = 2, use_description = True, use_name = True, use_metadata = False, max_dur_diff = None):
+def list_duplicates(recording_list, mode = 2, use_description = True, use_name = True, use_metadata = False, use_episode = False, max_dur_diff = None):
     folder_length = len(recording_list)
     # duplicates = [[None] * 10 for i in range(folder_length)]
     # stime = time.time()

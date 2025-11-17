@@ -272,7 +272,7 @@ Moodi   Ehdot
 8       nimi JA kuvaus JA jakson numero
 9       nimi JA jakson numero
 ```
-Lisäksi on mahdollista käyttää haluttua yhdistelmää ehdoista nimi (n), kuvaus (d), metadataId (m) ja ero pituudessa korkeintaan X minuuttia (.X). Esimerkkejä:
+Lisäksi on mahdollista käyttää haluttua yhdistelmää ehdoista nimi (n), kuvaus (d), metadataId (m), jakson numero (e) ja ero pituudessa korkeintaan X minuuttia (.X). Esimerkkejä:
 ```
 Komento      Selite
 rd n d       nimi JA kuvaus
